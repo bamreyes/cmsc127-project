@@ -1,11 +1,13 @@
+import { LicenseType, LicenseStatus, Sex } from "@/types/driver";
+
 export interface Driver {
   license_number: string;
   full_name: string;
   date_of_birth: Date;
-  sex: string;
+  sex: Sex;
   address: string;
-  license_type: "Student Permit" | "Non-Professional" | "Professional";
-  license_status: "Valid" | "Expired" | "Suspended" | "Revoked";
+  license_type: LicenseType;
+  license_status: LicenseStatus;
   issued_at: Date;
   expires_at: Date;
 }

@@ -1,8 +1,10 @@
+import { VehicleType } from "@/types/vehicle";
+
 export interface Vehicle {
   plate_number: string;
   engine_number: string;
   chassis_number: string;
-  vehicle_type: "Motorcycle" | "Private Car" | "Public Utility Vehicle";
+  vehicle_type: VehicleType;
   make: string;
   model: string;
   year: number;
