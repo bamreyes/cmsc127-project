@@ -19,7 +19,7 @@ export const getAllRegistrations = async () => {
 };
 
 // GET registrations BY registration_number
-export const getRegistration = async (registration_number: number) => {
+export const getRegistration = async(registration_number: number) => {
     const connection = await pool.getConnection();
 
     try {
@@ -62,6 +62,28 @@ export const createRegistration = async(vehicle_registration: VehicleRegistratio
         connection.release();
     }
 };
+
+// DELETE registration
+export const deleteRegistration = async(registration_number: number) => {
+    const connection = await pool.getConnection();
+
+    try {
+        const [result] = (await connection.query<ResultSetHeader>(
+            "DELETE FROM vehicle_registrations WHERE registration_number = ?;",
+            [registration_number]
+        ));
+        
+        if (result.affectedRows == 0) {
+            return null;
+        }
+
+        return registration_number;
+    } catch (error) {
+        throw error;
+    } finally {
+        connection.release();
+    }
+}
 
 // GENERAL FUNCTION FORMAT
 /*
