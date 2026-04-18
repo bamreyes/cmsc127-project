@@ -1,14 +1,20 @@
 import { Router } from "express";
 import { getAllRegistrations,
-         getRegistration,
+         getRegistrationID,
+         getRegistrationPlateNo,
+         getExpiredRegistrations,
          createRegistration,
+         updateRegistration,
          deleteRegistration } from "@/features/registrations/registration.controller";
 
 const router = Router();
 
-router.get("/", getAllRegistrations);                        // GET /api/registrations
-router.get("/:registration_number", getRegistration);        // GET /api/registrations/:reg_no
-router.post("/", createRegistration);                        // POST /api/registrations
-router.delete("/:registration_number", deleteRegistration);  // DELERE /api/registrations/:reg_no
+router.get("/", getAllRegistrations);                         // GET /api/registrations
+router.get("/:registration_number", getRegistrationID);       // GET /api/registrations/:reg_no
+router.get("/:plate_number", getRegistrationPlateNo);  // GET /api/registrations/:plate_no
+router.get("/expired", getExpiredRegistrations);              // GET /api/registrations/expired
+router.post("/", createRegistration);                         // POST /api/registrations
+router.put("/:registration_number", updateRegistration);      // PUT /api/registrations/:reg_no
+router.delete("/:registration_number", deleteRegistration);   // DELETE /api/registrations/:reg_no
 
 export default router;

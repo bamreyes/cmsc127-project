@@ -15,14 +15,18 @@ export const getAllRegistrations = async (req: Request, res: Response) => {
         const result = await RegistrationService.getAllRegistrations();
         console.log(result);
 
+        if(!result || result.length === 0) {
+            return res.status(404).send({ success: false, message: "Vehicle registration(s) not found." });
+        }
+
         res.status(200).send({ success: true, data: result });
     } catch (error) {
-        res.status(500).send({ success: false, message: "An error occured" });
+        res.status(500).send({ success: false, message: "An error occurred." });
     }
 };
 
 // GET /api/registrations/:registration_number
-export const getRegistration = async (req: Request, res: Response) => {
+export const getRegistrationID = async (req: Request, res: Response) => {
     const { registration_number } = req.params;
     const regNum = parseInt(registration_number as string, 10);  // Convert to int.
 
@@ -31,13 +35,13 @@ export const getRegistration = async (req: Request, res: Response) => {
     }
 
     try {
-        const result = await RegistrationService.getRegistration(regNum);
+        const result = await RegistrationService.getRegistrationID(regNum);
         console.log(result);
 
         if(!result) {
-            return res.status(404).send({ 
-                success: false, 
-                message: "Vehicle registration not found." 
+            return res.status(404).send({
+                success: false,
+                message: "Vehicle registration not found."
             });
         }
 
@@ -46,6 +50,44 @@ export const getRegistration = async (req: Request, res: Response) => {
         res.status(500).send({ success: false, message: "An error occurred." });
     }
 };
+
+// GET /api/registrations/:plate_number
+export const getRegistrationPlateNo = async (req: Request, res: Response) => {
+    const { plate_number } = req.params;
+
+    if(typeof plate_number !== "string") {
+        return res.status(400).send({ success: false, error: "Plate number must be a string." });
+    }
+
+    try {
+        const result = await RegistrationService.getRegistrationPlateNo(plate_number);
+        console.log(result);
+
+        if(!result || result.length === 0) {
+            return res.status(404).send({ success: false, message: "Vehicle registration(s) not found." });
+        }
+
+        res.status(200).send({ success: true, data: result });
+    } catch (error) {
+        res.status(500).send({ success: false, message: "An error occurred." });
+    }
+};
+
+// GET /api/registrations/expired
+export const getExpiredRegistrations = async (req: Request, res: Response) => {
+    try {
+        const result = await RegistrationService.getExpiredRegistrations();
+        console.log(result);
+
+        if(!result || result.length === 0) {
+            return res.status(404).send({ success: false, message: "Vehicle registration(s) not found." });
+        }
+
+        res.status(200).send({ success: true, data: result });
+    } catch (error) {
+        res.status(500).send({ success: false, message: "An error occurred." });
+    }
+}
 
 // POST /api/registrations
 export const createRegistration = async (req: Request, res: Response) => {
@@ -59,12 +101,12 @@ export const createRegistration = async (req: Request, res: Response) => {
     const newExpDate = formatDate(expiration_date);
 
     const requiredFields = ["registration_number",
-                            "registration_status",
-                            "registration_date",
-                            "expiration_date",
-                            "plate_number"];
+        "registration_status",
+        "registration_date",
+        "expiration_date",
+        "plate_number"];
 
-    for (const field of requiredFields) {
+    for(const field of requiredFields) {
         if(!req.body[field]) {
             return res.status(400).send({ success: false, message: `'${field}' is required.` });
         }
@@ -79,7 +121,7 @@ export const createRegistration = async (req: Request, res: Response) => {
     if(isNaN(new Date(newRegDate).getTime()) || isNaN(new Date(newExpDate).getTime())) {
         return res
             .status(400)
-            .send({ success: false, message: "Dates must be in a valid format (YYYY-MM-DD)." });
+            .send({ success: false, message: "Date(s) must be in a valid format (YYYY-MM-DD)." });
     }
 
     if(new Date(newExpDate) <= new Date(newRegDate)) {
@@ -92,8 +134,8 @@ export const createRegistration = async (req: Request, res: Response) => {
         const result = await RegistrationService.createRegistration({
             registration_number,
             registration_status,
-            registration_date: new Date (newRegDate),
-            expiration_date: new Date (newExpDate),
+            registration_date: new Date(newRegDate),
+            expiration_date: new Date(newExpDate),
             plate_number
         } as VehicleRegistration);
 
@@ -104,6 +146,67 @@ export const createRegistration = async (req: Request, res: Response) => {
             return res.status(409).send({ success: false, message: "A vehicle registration with this registration number already exists." });
         }
 
+        res.status(500).send({ success: false, message: "An error occurred." });
+    }
+};
+
+// PUT /api/registrations/:registration_number
+export const updateRegistration = async (req: Request, res: Response) => {
+    const { registration_number } = req.params;
+    const regNum = parseInt(registration_number as string, 10);  // Convert to int.
+
+    if(isNaN(regNum)) {
+        return res.status(400).send({ success: false, error: "Registration number must be a number." });
+    }
+
+    const { registration_status,
+            registration_date,
+            expiration_date,
+            plate_number } = req.body;
+
+    const requiredFields = ["registration_status",
+                            "registration_date",
+                            "expiration_date",
+                            "plate_number"];
+
+    for(const field of requiredFields) {
+        if(!req.body[field]) {
+            return res.status(400).send({ success: false, message: `'${field}' is required.` });
+        }
+    }
+
+    if(isNaN(new Date(registration_date).getTime()) || isNaN(new Date(expiration_date).getTime())) {
+        return res
+            .status(400)
+            .send({ success: false, message: "Date(s) must be in a valid format (YYYY-MM-DD)." });
+    }
+
+    if(new Date(expiration_date) <= new Date(registration_date)) {
+        return res
+            .status(400)
+            .send({ success: false, message: "Expiration date cannot be on or before registration date." });
+    }
+
+    const newRegDate = formatDate(registration_date);
+    const newExpDate = formatDate(expiration_date);
+
+    try {
+        const result = await RegistrationService.updateRegistration({
+            registration_status,
+            registration_date: new Date(newRegDate),
+            expiration_date: new Date(newExpDate),
+            plate_number,
+            registration_number: regNum
+        } as VehicleRegistration);
+
+        console.log(result);
+
+        if(!result) {
+            return res.status(404).send({ success: false, message: "Vehicle registration not found." });
+        }
+
+        res.status(200).send({ success: true, message: "Vehicle registration updated successfully.", data: result });
+    } catch (error) {
         res.status(500).send({ success: false, message: "An error occurred." });
     }
 };
@@ -121,10 +224,10 @@ export const deleteRegistration = async (req: Request, res: Response) => {
         const result = await RegistrationService.deleteRegistration(regNum);
         console.log(result);
 
-        if(result == null) {
-            return res.status(404).send({ 
-                success: false, 
-                message: "Vehicle registration not found." 
+        if(result === null) {
+            return res.status(404).send({
+                success: false,
+                message: "Vehicle registration not found."
             });
         }
 
