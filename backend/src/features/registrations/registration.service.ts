@@ -5,153 +5,162 @@ import { ResultSetHeader, RowDataPacket } from "mysql2/promise";
 
 // GET registrations
 export const getAllRegistrations = async () => {
-    const connection = await pool.getConnection();
+  const connection = await pool.getConnection();
 
-    try {
-        const [result] = (await connection.query("SELECT * FROM vehicle_registrations")) as any as [VehicleRegistration[], any];
-        
-        return result as VehicleRegistration[];
-    } catch (error) {
-        throw error;
-    } finally {
-        connection.release();
-    }
+  try {
+    const [result] = (await connection.query("SELECT * FROM vehicle_registrations")) as any as [
+      VehicleRegistration[],
+      any,
+    ];
+
+    return result as VehicleRegistration[];
+  } catch (error) {
+    throw error;
+  } finally {
+    connection.release();
+  }
 };
 
 // GET registrations BY registration_number
-export const getRegistrationID = async(registration_number: number) => {
-    const connection = await pool.getConnection();
+export const getRegistrationID = async (registration_number: number) => {
+  const connection = await pool.getConnection();
 
-    try {
-        const [result] = await connection.query<RowDataPacket[]>(
-            "SELECT * FROM vehicle_registrations WHERE registration_number = ?",
-            [registration_number]
-        );
+  try {
+    const [result] = await connection.query<RowDataPacket[]>(
+      "SELECT * FROM vehicle_registrations WHERE registration_number = ?",
+      [registration_number],
+    );
 
-        if(result.length === 0) {
-            return null;
-        }
-
-        return result[0] as VehicleRegistration;
-    } catch (error) {
-        throw error;
-    } finally {
-        connection.release();
+    if (result.length === 0) {
+      return null;
     }
+
+    return result[0] as VehicleRegistration;
+  } catch (error) {
+    throw error;
+  } finally {
+    connection.release();
+  }
 };
 
 // GET registrations BY plate_number
-export const getRegistrationPlateNo = async(plate_number: string) => {
-    const connection = await pool.getConnection();
+export const getRegistrationPlateNo = async (plate_number: string) => {
+  const connection = await pool.getConnection();
 
-    try {
-        const [result] = await connection.query<RowDataPacket[]>(
-            "SELECT * FROM vehicle_registrations WHERE plate_number = ?",
-            [plate_number]
-        );
+  try {
+    const [result] = await connection.query<RowDataPacket[]>(
+      "SELECT * FROM vehicle_registrations WHERE plate_number = ?",
+      [plate_number],
+    );
 
-        return result as VehicleRegistration[];
-    } catch (error) {
-        throw error;
-    } finally {
-        connection.release();
-    }
+    return result as VehicleRegistration[];
+  } catch (error) {
+    throw error;
+  } finally {
+    connection.release();
+  }
 };
 
 // GET registrations WHERE status = expired
-export const getExpiredRegistrations = async() => {
-    const connection = await pool.getConnection();
+export const getExpiredRegistrations = async () => {
+  const connection = await pool.getConnection();
 
-    try {
-        const [result] = await connection.query<RowDataPacket[]>("SELECT * FROM vehicle_registrations WHERE expiration_date <= CURDATE() AND registration_status = 'Expired'");
-        
-        return result as VehicleRegistration[];
-    } catch (error) {
-        throw error;
-    } finally {
-        connection.release();
-    } 
-}
+  try {
+    const [result] = await connection.query<RowDataPacket[]>(
+      "SELECT * FROM vehicle_registrations WHERE expiration_date <= CURDATE() AND registration_status = 'Expired'",
+    );
+
+    return result as VehicleRegistration[];
+  } catch (error) {
+    throw error;
+  } finally {
+    connection.release();
+  }
+};
 
 // POST registration
-export const createRegistration = async(vehicle_registration: VehicleRegistration) => {
-    const connection = await pool.getConnection();
+export const createRegistration = async (vehicle_registration: VehicleRegistration) => {
+  const connection = await pool.getConnection();
 
-    try {
-        const [result] = await connection.query<ResultSetHeader>(
-            "INSERT INTO vehicle_registrations (registration_number, registration_status, registration_date, expiration_date, plate_number) VALUES (?, ?, ?, ?, ?)",
-            [vehicle_registration.registration_number,
-             vehicle_registration.registration_status,
-             vehicle_registration.registration_date,
-             vehicle_registration.expiration_date,
-             vehicle_registration.plate_number]
-        );
+  try {
+    const [result] = await connection.query<ResultSetHeader>(
+      "INSERT INTO vehicle_registrations (registration_number, registration_status, registration_date, expiration_date, plate_number) VALUES (?, ?, ?, ?, ?)",
+      [
+        vehicle_registration.registration_number,
+        vehicle_registration.registration_status,
+        vehicle_registration.registration_date,
+        vehicle_registration.expiration_date,
+        vehicle_registration.plate_number,
+      ],
+    );
 
-        const [rows] = await connection.query<RowDataPacket[]>(
-            "SELECT * FROM vehicle_registrations WHERE registration_number = ?",
-            [vehicle_registration.registration_number]
-        );
+    const [rows] = await connection.query<RowDataPacket[]>(
+      "SELECT * FROM vehicle_registrations WHERE registration_number = ?",
+      [vehicle_registration.registration_number],
+    );
 
-        return rows[0] as VehicleRegistration;
-    } catch (error) {
-        throw error;
-    } finally {
-        connection.release();
-    }
+    return rows[0] as VehicleRegistration;
+  } catch (error) {
+    throw error;
+  } finally {
+    connection.release();
+  }
 };
 
 // PUT registration BY registration_number
-export const updateRegistration = async(vehicle_registration: VehicleRegistration) => {
-    const connection = await pool.getConnection();
+export const updateRegistration = async (vehicle_registration: VehicleRegistration) => {
+  const connection = await pool.getConnection();
 
-    try {
-        const [result] = await connection.query<ResultSetHeader>(
-            "UPDATE vehicle_registrations SET registration_status = ?, registration_date = ?, expiration_date = ?, plate_number = ? WHERE registration_number = ?",
-            [vehicle_registration.registration_status,
-             vehicle_registration.registration_date,
-             vehicle_registration.expiration_date,
-             vehicle_registration.plate_number,
-             vehicle_registration.registration_number]
-        );
+  try {
+    const [result] = await connection.query<ResultSetHeader>(
+      "UPDATE vehicle_registrations SET registration_status = ?, registration_date = ?, expiration_date = ?, plate_number = ? WHERE registration_number = ?",
+      [
+        vehicle_registration.registration_status,
+        vehicle_registration.registration_date,
+        vehicle_registration.expiration_date,
+        vehicle_registration.plate_number,
+        vehicle_registration.registration_number,
+      ],
+    );
 
-        if(result.affectedRows === 0) {
-            return null;
-        }
-
-        const [rows] = await connection.query<RowDataPacket[]>(
-            "SELECT * FROM vehicle_registrations WHERE registration_number = ?",
-            [vehicle_registration.registration_number],
-        );
-
-        return rows[0] as VehicleRegistration;
-    } catch (error) {
-        throw error;
-    } finally {
-        connection.release();
+    if (result.affectedRows === 0) {
+      return null;
     }
+
+    const [rows] = await connection.query<RowDataPacket[]>(
+      "SELECT * FROM vehicle_registrations WHERE registration_number = ?",
+      [vehicle_registration.registration_number],
+    );
+
+    return rows[0] as VehicleRegistration;
+  } catch (error) {
+    throw error;
+  } finally {
+    connection.release();
+  }
 };
 
 // DELETE registration
-export const deleteRegistration = async(registration_number: number) => {
-    const connection = await pool.getConnection();
+export const deleteRegistration = async (registration_number: number) => {
+  const connection = await pool.getConnection();
 
-    try {
-        const [result] = await connection.query<ResultSetHeader>(
-            "DELETE FROM vehicle_registrations WHERE registration_number = ?;",
-            [registration_number]
-        );
-        
-        if(result.affectedRows === 0) {
-            return null;
-        }
+  try {
+    const [result] = await connection.query<ResultSetHeader>(
+      "DELETE FROM vehicle_registrations WHERE registration_number = ?;",
+      [registration_number],
+    );
 
-        return registration_number;
-    } catch (error) {
-        throw error;
-    } finally {
-        connection.release();
+    if (result.affectedRows === 0) {
+      return null;
     }
-}
+
+    return registration_number;
+  } catch (error) {
+    throw error;
+  } finally {
+    connection.release();
+  }
+};
 
 // GENERAL FUNCTION FORMAT
 /*
