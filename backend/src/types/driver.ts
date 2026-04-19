@@ -10,7 +10,11 @@ export interface DriverFilter {
   license_status?: LicenseStatus | null;
   min_bdate?: Date | null;
   max_bdate?: Date | null;
-  address?: string | null;
+  region?: string | null;
+  province?: string | null;
+  city_municipality?: string | null;
+  barangay?: string | null;
+  street_building_house?: string | null;
   min_issued_at?: Date | null;
   max_issued_at?: Date | null;
   min_expires_at?: Date | null;
