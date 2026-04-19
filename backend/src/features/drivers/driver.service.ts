@@ -118,8 +118,8 @@ export const filterDriver = async ({
   sex,
   license_type,
   license_status,
-  min_date,
-  max_date,
+  min_bdate,
+  max_bdate,
 }: DriverFilter) => {
   const connection = await pool.getConnection();
   try {
@@ -134,13 +134,13 @@ export const filterDriver = async ({
       conditions.push("license_status = ?");
       params.push(license_status);
     }
-    if (min_date) {
+    if (min_bdate) {
       conditions.push("date_of_birth >= ?");
-      params.push(min_date);
+      params.push(min_bdate);
     }
-    if (max_date) {
+    if (max_bdate) {
       conditions.push("date_of_birth <= ?");
-      params.push(max_date);
+      params.push(max_bdate);
     }
     if (sex) {
       conditions.push("sex = ?");
