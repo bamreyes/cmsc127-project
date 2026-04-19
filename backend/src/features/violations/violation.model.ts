@@ -1,10 +1,11 @@
-import { RegistrationStatus, ViolationStatus } from "@/types/violation";
+import { ViolationStatus } from "@/types/violation";
 
 export interface TrafficViolation {
-  id: number;
-  registration_status: RegistrationStatus;
+  violation_id: number;
   date: Date;
-  location: string;
+  region: string;
+  province: string;
+  city_municipality: string;
   fine_amount: number;
   apprehending_officer: string;
   violation_status: ViolationStatus;

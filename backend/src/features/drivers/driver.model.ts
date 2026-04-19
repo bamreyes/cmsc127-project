@@ -5,7 +5,11 @@ export interface Driver {
   full_name: string;
   date_of_birth: Date;
   sex: Sex;
-  address: string;
+  region: string;
+  province: string;
+  city_municipality: string;
+  barangay: string;
+  street_building_house: string;
   license_type: LicenseType;
   license_status: LicenseStatus;
   issued_at: Date;

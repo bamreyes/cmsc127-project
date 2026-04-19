@@ -50,7 +50,11 @@ export const createDriver = async (req: Request, res: Response) => {
     full_name,
     date_of_birth,
     sex,
-    address,
+    region,
+    province,
+    city_municipality,
+    barangay,
+    street_building_house,
     license_type,
     license_status,
     issued_at,
@@ -62,7 +66,10 @@ export const createDriver = async (req: Request, res: Response) => {
     "full_name",
     "date_of_birth",
     "sex",
-    "address",
+    "region",
+    "province",
+    "city_municipality",
+    "street_building_house",
     "license_type",
     "license_status",
     "issued_at",
@@ -97,7 +104,11 @@ export const createDriver = async (req: Request, res: Response) => {
       full_name,
       date_of_birth,
       sex,
-      address,
+      region,
+      province,
+      city_municipality,
+      barangay: barangay || null,
+      street_building_house,
       license_type,
       license_status,
       issued_at,
@@ -136,7 +147,11 @@ export const updateDriver = async (req: Request, res: Response) => {
     full_name,
     date_of_birth,
     sex,
-    address,
+    region,
+    province,
+    city_municipality,
+    barangay,
+    street_building_house,
     license_type,
     license_status,
     issued_at,
@@ -148,7 +163,10 @@ export const updateDriver = async (req: Request, res: Response) => {
     "full_name",
     "date_of_birth",
     "sex",
-    "address",
+    "region",
+    "province",
+    "city_municipality",
+    "street_building_house",
     "license_type",
     "license_status",
     "issued_at",
@@ -179,7 +197,11 @@ export const updateDriver = async (req: Request, res: Response) => {
       full_name,
       date_of_birth,
       sex,
-      address,
+      region,
+      province,
+      city_municipality,
+      barangay: barangay,
+      street_building_house,
       license_type,
       license_status,
       issued_at,
@@ -229,11 +251,11 @@ export const deleteDriver = async (req: Request, res: Response) => {
 
 // GET /api/drivers/filter/
 export const filterDrivers = async (req: Request, res: Response) => {
-  const { license_type, license_status, min_date, max_date, sex } = req.query;
+  const { license_type, license_status, min_bdate, max_bdate, sex } = req.query;
 
-  if (min_date || max_date) {
-    const min = new Date(min_date as string);
-    const max = new Date(max_date as string);
+  if (min_bdate || max_bdate) {
+    const min = new Date(min_bdate as string);
+    const max = new Date(max_bdate as string);
 
     if (isNaN(min.getTime()) || isNaN(max.getTime())) {
       return res.status(400).send({
@@ -255,8 +277,8 @@ export const filterDrivers = async (req: Request, res: Response) => {
       sex: (sex as Sex) ?? null,
       license_type: (license_type as LicenseType) ?? null,
       license_status: (license_status as LicenseStatus) ?? null,
-      min_date: min_date ? new Date(min_date as string) : null,
-      max_date: max_date ? new Date(max_date as string) : null,
+      min_bdate: min_bdate ? new Date(min_bdate as string) : null,
+      max_bdate: max_bdate ? new Date(max_bdate as string) : null,
     } as DriverFilter);
 
     res
