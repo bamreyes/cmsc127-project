@@ -4,7 +4,9 @@ export interface ViolationFilter {
   violation_id?: number | null;
   min_date?: Date | null;
   max_date?: Date | null;
-  location?: string | null;
+  region?: string | null;
+  province?: string | null;
+  city_municipality?: string | null;
   min_fine_amount?: number | null;
   max_fine_amount?: number | null;
   apprehending_officer?: string | null;
