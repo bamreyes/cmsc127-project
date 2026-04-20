@@ -1,6 +1,7 @@
 import pool from "@/config/db";
 import { Vehicle } from "@/features/vehicles/vehicle.model";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
+import { DriverFilter } from "@/types/driver";
 
 export const getAllVehicles = async () => {
   const connection = await pool.getConnection();
@@ -107,6 +108,42 @@ export const deleteVehicle = async (plate_number: string) => {
     }
 
     return plate_number;
+  } catch (error) {
+    throw error;
+  } finally {
+    connection.release();
+  }
+};
+
+export const filterVehicleByDriver = async (driverFilter: DriverFilter) => {
+  const connection = await pool.getConnection();
+  const conditions: string[] = [];
+  const params: any[] = [];
+  const mapping: Record<string, string> = {
+    min_bdate: "d.date_of_birth >= ?",
+    max_bdate: "d.date_of_birth <= ?",
+    min_issued_at: "d.issued_at >= ?",
+    max_issued_at: "d.issued_at <= ?",
+    min_expires_at: "d.expires_at >= ?",
+    max_expires_at: "d.expires_at <= ?",
+    street_building_house: "d.street_building_house LIKE ?",
+  };
+
+  Object.entries(driverFilter).forEach(([key, value]) => {
+    if (!value) return;
+    conditions.push(mapping[key] || `d.${key} = ?`);
+    params.push(key === "street_building_house" ? `%${value}%` : value);
+  });
+
+  const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+
+  try {
+    const [result] = await connection.query(
+      `SELECT v.* FROM vehicles v INNER JOIN drivers d ON v.license_number = d.license_number ${whereClause}`,
+      params,
+    );
+
+    return result as Vehicle[];
   } catch (error) {
     throw error;
   } finally {
