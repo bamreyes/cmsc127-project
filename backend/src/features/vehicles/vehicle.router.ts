@@ -1,9 +1,13 @@
 import { Router } from "express";
-// import {} from "@/features/vehicle/vehicle.controller";
+import {
+    getAllVehicles,
+    getVehicle,
+} from "@/features/vehicles/vehicle.controller";
 
 const router = Router();
 
-// router.get("/", ...);
+router.get("/", getAllVehicles);
+router.get("/:plate_number", getVehicle);
 // router.post("/", ...);
 // router.put("/", ...);
 // router.delete("/", ...);
