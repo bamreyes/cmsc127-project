@@ -176,3 +176,32 @@ export const updateVehicle = async (req: Request, res: Response) => {
         });
     }
 }
+
+export const deleteVehicle = async (req: Request, res: Response) => {
+  const { plate_number } = req.params;
+
+  if (!plate_number) {
+    return res.status(400).send({ success: false, message: "Plate number is required" });
+  }
+
+  if (typeof plate_number !== "string" || plate_number.trim() === "") {
+    return res
+      .status(400)
+      .send({ success: false, message: "A valid plate number string is required" });
+  }
+
+  try {
+    const result = await VehicleService.deleteVehicle(plate_number as string);
+    console.log(result);
+
+    if (!result) {
+      return res.status(404).send({ success: false, message: "Vehicle not found" });
+    }
+
+    res
+      .status(200)
+      .send({ success: true, message: "Vehicle successfully deleted", deleted_id: result });
+  } catch (error) {
+    res.status(500).send({ success: false, message: "An error occured" });
+  }
+};

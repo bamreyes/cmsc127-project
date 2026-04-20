@@ -92,3 +92,21 @@ export const updateVehicle = async (vehicle: Vehicle) => {
     connection.release();
   }
 };
+
+export const deleteVehicle = async (plate_number: string) => {
+  const connection = await pool.getConnection();
+
+  try {
+    const [result] = await connection.query<ResultSetHeader>("DELETE FROM vehicles WHERE plate_number=?", [plate_number],);
+    
+    if (result.affectedRows === 0){
+      return null;
+    }
+
+    return plate_number;
+  } catch (error) {
+    throw error;
+  } finally {
+    connection.release();
+  }
+};
