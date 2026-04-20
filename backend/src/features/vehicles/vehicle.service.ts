@@ -4,13 +4,13 @@ import { ResultSetHeader, RowDataPacket } from "mysql2";
 
 export const getAllVehicles = async () => {
   const connection = await pool.getConnection();
-  try{
+  try {
     const [result] = (await connection.query("SELECT * FROM vehicles")) as any as [Vehicle[], any];
     return result;
-  }catch (error) {
+  } catch (error) {
     throw error;
   } finally {
-    connection.release;
+    connection.release();
   }
 };
 
@@ -63,9 +63,8 @@ export const updateVehicle = async (vehicle: Vehicle) => {
   const connection = await pool.getConnection();
   try {
     const [result] = await connection.query<ResultSetHeader>(
-      "UPDATE vehicles SET engine_number=?, chassis_number=?, vehicle_type=?, make=?, model=?, year=?, color=?, license_number=? WHERE license_number=?",
+      "UPDATE vehicles SET engine_number=?, chassis_number=?, vehicle_type=?, make=?, model=?, year=?, color=?, license_number=? WHERE plate_number=?",
       [
-        vehicle.plate_number,
         vehicle.engine_number,
         vehicle.chassis_number,
         vehicle.vehicle_type,
@@ -74,6 +73,7 @@ export const updateVehicle = async (vehicle: Vehicle) => {
         vehicle.year,
         vehicle.color,
         vehicle.license_number,
+        vehicle.plate_number,
       ],
     );
 
@@ -82,8 +82,8 @@ export const updateVehicle = async (vehicle: Vehicle) => {
     }
 
     const [rows] = await connection.query<RowDataPacket[]>(
-      "SELECT * FROM vehicle WHERE plate_number = ?",
-      [vehicle.license_number],
+      "SELECT * FROM vehicles WHERE plate_number = ?",
+      [vehicle.plate_number],
     );
     return rows[0] as Vehicle;
   } catch (error) {
@@ -97,9 +97,12 @@ export const deleteVehicle = async (plate_number: string) => {
   const connection = await pool.getConnection();
 
   try {
-    const [result] = await connection.query<ResultSetHeader>("DELETE FROM vehicles WHERE plate_number=?", [plate_number],);
-    
-    if (result.affectedRows === 0){
+    const [result] = await connection.query<ResultSetHeader>(
+      "DELETE FROM vehicles WHERE plate_number=?",
+      [plate_number],
+    );
+
+    if (result.affectedRows === 0) {
       return null;
     }
 

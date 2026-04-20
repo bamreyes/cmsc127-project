@@ -89,19 +89,25 @@ export const createVehicle = async (req: Request, res: Response) => {
 
     console.log(result);
 
-    return res.status(200).send({ success: true, message: "Vehicle created successfully", data: result });
+    res.status(200).send({ success: true, message: "Vehicle created successfully", data: result });
   } catch (error: any) {
     if (error.code === "ER_DUP_ENTRY") {
-      return res
-        .status(409)
-        .send({ success: false, message: "A vehicle with this plate number already exists." });
+      return res.status(409).send({
+        success: false,
+        message:
+          "A vehicle with this plate number, engine number, or chassis number already exists.",
+      });
     }
-  }
 
-  res.status(500).send({
-    success: false,
-    message: "An error occurred",
-  });
+    if (error.code === "ER_NO_REFERENCED_ROW_2") {
+      return res.status(409).send({
+        success: false,
+        message: "The referenced license number does not exist",
+      });
+    }
+
+    res.status(500).send({ success: false, message: "An error occurred", error });
+  }
 };
 
 // PUT update
