@@ -34,17 +34,13 @@ export const createDriver = async (driver: Driver) => {
   const connection = await pool.getConnection();
   try {
     const [result] = await connection.query<ResultSetHeader>(
-      "INSERT INTO drivers VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+      "INSERT INTO drivers VALUES (?,?,?,?,?,?,?,?,?)",
       [
         driver.license_number,
         driver.full_name,
         driver.date_of_birth,
         driver.sex,
-        driver.region,
-        driver.province,
-        driver.city_municipality,
-        driver.barangay,
-        driver.street_building_house,
+        driver.address,
         driver.license_type,
         driver.license_status,
         driver.issued_at,
@@ -68,16 +64,12 @@ export const updateDriver = async (driver: Driver) => {
   const connection = await pool.getConnection();
   try {
     const [result] = await connection.query<ResultSetHeader>(
-      "UPDATE drivers SET full_name=?, date_of_birth=?, sex=?, region=?, province=?, city_municipality=?, barangay=?, street_building_house=?, license_type=?, license_status=?, issued_at=?, expires_at=? WHERE license_number=?",
+      "UPDATE drivers SET full_name=?, date_of_birth=?, sex=?, address=?, license_type=?, license_status=?, issued_at=?, expires_at=? WHERE license_number=?",
       [
         driver.full_name,
         driver.date_of_birth,
         driver.sex,
-        driver.region,
-        driver.province,
-        driver.city_municipality,
-        driver.barangay,
-        driver.street_building_house,
+        driver.address,
         driver.license_type,
         driver.license_status,
         driver.issued_at,
@@ -128,6 +120,7 @@ export const filterDriver = async ({
   license_status,
   min_bdate,
   max_bdate,
+  address,
 }: DriverFilter) => {
   const connection = await pool.getConnection();
   try {
@@ -153,6 +146,10 @@ export const filterDriver = async ({
     if (sex) {
       conditions.push("sex = ?");
       params.push(sex);
+    }
+    if (address) {
+      conditions.push("address LIKE ?");
+      params.push(`%${address}%`);
     }
     const where = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 

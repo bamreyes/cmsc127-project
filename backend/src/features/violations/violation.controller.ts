@@ -49,9 +49,7 @@ export const getViolation = async (req: Request, res: Response) => {
 export const createViolation = async (req: Request, res: Response) => {
   const {
     date,
-    region,
-    province,
-    city_municipality,
+    location,
     fine_amount,
     apprehending_officer,
     violation_status,
@@ -62,9 +60,7 @@ export const createViolation = async (req: Request, res: Response) => {
 
   const requiredFields = [
     "date",
-    "region",
-    "province",
-    "city_municipality",
+    "location",
     "fine_amount",
     "violation_status",
     "violation_type",
@@ -87,9 +83,7 @@ export const createViolation = async (req: Request, res: Response) => {
   try {
     const result = await ViolationService.createViolation({
       date,
-      region,
-      province,
-      city_municipality,
+      location,
       fine_amount,
       apprehending_officer,
       violation_status,
@@ -163,9 +157,7 @@ export const updateViolation = async (req: Request, res: Response) => {
 
   const {
     date,
-    region,
-    province,
-    city_municipality,
+    location,
     fine_amount,
     apprehending_officer,
     violation_status,
@@ -176,9 +168,7 @@ export const updateViolation = async (req: Request, res: Response) => {
 
   const requiredFields = [
     "date",
-    "region",
-    "province",
-    "city_municipality",
+    "location",
     "fine_amount",
     "violation_status",
     "violation_type",
@@ -202,9 +192,7 @@ export const updateViolation = async (req: Request, res: Response) => {
     const result = await ViolationService.updateViolation({
       violation_id: id,
       date,
-      region,
-      province,
-      city_municipality,
+      location,
       fine_amount,
       apprehending_officer,
       violation_status,
@@ -230,9 +218,7 @@ export const filterViolations = async (req: Request, res: Response) => {
   const {
     min_date,
     max_date,
-    region,
-    province,
-    city_municipality,
+    location,
     min_fine_amount,
     max_fine_amount,
     apprehending_officer,
@@ -263,9 +249,7 @@ export const filterViolations = async (req: Request, res: Response) => {
     const result = await ViolationService.filterViolation({
       min_date: min_date ? new Date(min_date as string) : null,
       max_date: max_date ? new Date(max_date as string) : null,
-      region: (region as string) || null,
-      province: (province as string) || null,
-      city_municipality: (city_municipality as string) || null,
+      location: (location as string) || null,
       min_fine_amount: min_fine_amount ? Number(min_fine_amount) : null,
       max_fine_amount: max_fine_amount ? Number(max_fine_amount) : null,
       apprehending_officer: (apprehending_officer as string) || null,
@@ -289,11 +273,7 @@ export const filterByDriver = async (req: Request, res: Response) => {
     min_bdate,
     max_bdate,
     sex,
-    region,
-    province,
-    city_municipality,
-    barangay,
-    street_building_house,
+    address,
     license_type,
     license_status,
     min_issued_at,
@@ -301,6 +281,7 @@ export const filterByDriver = async (req: Request, res: Response) => {
     min_expires_at,
     max_expires_at,
     license_number,
+    location,
     min_date,
     max_date,
   } = req.query;
@@ -336,11 +317,7 @@ export const filterByDriver = async (req: Request, res: Response) => {
     const filters: DriverFilter = {
       full_name: (full_name as string) || null,
       sex: (sex as Sex) || null,
-      region: (region as string) || null,
-      province: (province as string) || null,
-      city_municipality: (city_municipality as string) || null,
-      barangay: (barangay as string) || null,
-      street_building_house: (street_building_house as string) || null,
+      address: (address as string) || null,
       license_number: (license_number as string) || null,
       license_type: (license_type as LicenseType) || null,
       license_status: (license_status as LicenseStatus) || null,
@@ -355,7 +332,12 @@ export const filterByDriver = async (req: Request, res: Response) => {
     const vMin = min_date ? new Date(min_date as string) : null;
     const vMax = max_date ? new Date(max_date as string) : null;
 
-    const result = await ViolationService.filterViolationByDriver(filters, vMin, vMax);
+    const result = await ViolationService.filterViolationByDriver(
+      filters,
+      vMin,
+      vMax,
+      (location as string) || null,
+    );
 
     res.status(200).send({
       success: true,
@@ -378,38 +360,53 @@ export const filterByVehicle = async (req: Request, res: Response) => {
     min_year,
     max_year,
     color,
+    location,
+    min_date,
+    max_date,
   } = req.query;
 
   const min = Number(min_year);
   const max = Number(max_year);
 
-  if (min_year && isNaN(min)) {
-    return res.status(400).send({ success: false, message: "Minimum year must be a valid number" });
-  }
+  const dateRanges = [{ min: min_date, max: max_date }];
 
-  if (max_year && isNaN(max)) {
-    return res.status(400).send({ success: false, message: "Maximum year must be a valid number" });
-  }
-
-  if (min_year && max_year && min > max) {
-    return res.status(400).send({
-      success: false,
-      message: `Minimum year (${min}) cannot be after maximum year (${max})`,
-    });
+  for (const range of dateRanges) {
+    const { min, max } = range;
+    if (min || max) {
+      const minD = min ? new Date(min as string) : null;
+      const maxD = max ? new Date(max as string) : null;
+      if ((min && isNaN(minD!.getTime())) || (max && isNaN(maxD!.getTime()))) {
+        return res.status(400).send({
+          success: false,
+          message: "Date  must be in a valid format (YYYY-MM-DD)",
+        });
+      }
+      if (minD && maxD && minD > maxD) {
+        return res.status(400).send({
+          success: false,
+          message: `Minimum cannot be after maximum`,
+        });
+      }
+    }
   }
 
   try {
-    const result = await ViolationService.filterViolationByVehicle({
-      plate_number: (plate_number as string) || null,
-      engine_number: (engine_number as string) || null,
-      chassis_number: (chassis_number as string) || null,
-      vehicle_type: (vehicle_type as VehicleType) || null,
-      make: (make as string) || null,
-      model: (model as string) || null,
-      max_year: max_year ? Number(max_year) : null,
-      min_year: min_year ? Number(min_year) : null,
-      color: (color as string) || null,
-    } as VehicleFilter);
+    const vMin = min_date ? new Date(min_date as string) : null;
+    const vMax = max_date ? new Date(max_date as string) : null;
+
+    const result = await ViolationService.filterViolationByVehicle(
+      {
+        plate_number: (plate_number as string) || null,
+        engine_number: (engine_number as string) || null,
+        chassis_number: (chassis_number as string) || null,
+        vehicle_type: (vehicle_type as VehicleType) || null,
+        make: (make as string) || null,
+        model: (model as string) || null,
+        max_year: max_year ? Number(max_year) : null,
+        min_year: min_year ? Number(min_year) : null,
+        color: (color as string) || null,
+      } as VehicleFilter,
+    );
 
     res.status(200).send({
       success: true,

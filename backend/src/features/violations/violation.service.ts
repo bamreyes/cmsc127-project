@@ -39,12 +39,10 @@ export const createViolation = async (violation: TrafficViolation) => {
   const connection = await pool.getConnection();
   try {
     const [insertResult] = await connection.query<ResultSetHeader>(
-      "INSERT INTO traffic_violations (date,region,province,city_municipality,fine_amount,apprehending_officer,violation_status,violation_type,license_number,plate_number) VALUES (?,?,?,?,?,?,?,?,?,?)",
+      "INSERT INTO traffic_violations (date,location,fine_amount,apprehending_officer,violation_status,violation_type,license_number,plate_number) VALUES (?,?,?,?,?,?,?,?)",
       [
         violation.date,
-        violation.region,
-        violation.province,
-        violation.city_municipality,
+        violation.location,
         violation.fine_amount,
         violation.apprehending_officer,
         violation.violation_status,
@@ -71,12 +69,10 @@ export const updateViolation = async (violation: TrafficViolation) => {
 
   try {
     const [result] = await connection.query<ResultSetHeader>(
-      "UPDATE traffic_violations SET date=?, region=?, province=?, city_municipality=?, fine_amount=?, apprehending_officer=?, violation_status=?, violation_type=?, license_number=?, plate_number=? WHERE violation_id=?",
+      "UPDATE traffic_violations SET date=?, location=?, fine_amount=?, apprehending_officer=?, violation_status=?, violation_type=?, license_number=?, plate_number=? WHERE violation_id=?",
       [
         violation.date,
-        violation.region,
-        violation.province,
-        violation.city_municipality,
+        violation.location,
         violation.fine_amount,
         violation.apprehending_officer,
         violation.violation_status,
@@ -138,8 +134,13 @@ export const filterViolation = async (violationFilter: ViolationFilter) => {
 
   Object.entries(violationFilter).forEach(([key, value]) => {
     if (value === undefined || value === null) return;
-    conditions.push(mapping[key] || `${key} = ?`);
-    params.push(value);
+    if (key === "location") {
+      conditions.push(`${key} LIKE ?`);
+      params.push(`%${value}%`);
+    } else {
+      conditions.push(mapping[key] || `${key} = ?`);
+      params.push(value);
+    }
   });
 
   const where = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
@@ -158,6 +159,7 @@ export const filterViolationByDriver = async (
   driverFilter: DriverFilter,
   min_date?: Date | null,
   max_date?: Date | null,
+  location?: string | null,
 ) => {
   const connection = await pool.getConnection();
   const conditions: string[] = [];
@@ -169,13 +171,13 @@ export const filterViolationByDriver = async (
     max_issued_at: "d.issued_at <= ?",
     min_expires_at: "d.expires_at >= ?",
     max_expires_at: "d.expires_at <= ?",
-    street_building_house: "d.street_building_house LIKE ?",
+    address: "d.address LIKE ?",
   };
 
   Object.entries(driverFilter).forEach(([key, value]) => {
     if (!value) return;
     conditions.push(mapping[key] || `d.${key} = ?`);
-    params.push(key === "street_building_house" ? `%${value}%` : value);
+    params.push(key === "address" ? `%${value}%` : value);
   });
 
   if (min_date) {
@@ -185,6 +187,10 @@ export const filterViolationByDriver = async (
   if (max_date) {
     conditions.push("tv.date <= ?");
     params.push(max_date);
+  }
+  if (location) {
+    conditions.push("tv.location LIKE ?");
+    params.push(`%${location}%`);
   }
 
   const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
@@ -203,7 +209,12 @@ export const filterViolationByDriver = async (
   }
 };
 
-export const filterViolationByVehicle = async (vehicleFilter: VehicleFilter) => {
+export const filterViolationByVehicle = async (
+  vehicleFilter: VehicleFilter,
+  min_date?: Date | null,
+  max_date?: Date | null,
+  location?: string | null,
+) => {
   const connection = await pool.getConnection();
   const conditions: string[] = [];
   const params: any[] = [];
@@ -217,6 +228,19 @@ export const filterViolationByVehicle = async (vehicleFilter: VehicleFilter) => 
     conditions.push(mapping[key] || `v.${key} = ?`);
     params.push(value);
   });
+
+  if (min_date) {
+    conditions.push("tv.date >= ?");
+    params.push(min_date);
+  }
+  if (max_date) {
+    conditions.push("tv.date <= ?");
+    params.push(max_date);
+  }
+  if (location) {
+    conditions.push("tv.location LIKE ?");
+    params.push(`%${location}%`);
+  }
 
   const vehicleWhere = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
@@ -243,4 +267,3 @@ export const getTypeCountByYear = async (year: number) => {
   return result as TrafficViolation[];
 };
 
-// TODO: Implement location

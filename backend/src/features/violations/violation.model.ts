@@ -3,9 +3,7 @@ import { ViolationStatus } from "@/types/violation";
 export interface TrafficViolation {
   violation_id: number;
   date: Date;
-  region: string;
-  province: string;
-  city_municipality: string;
+  location: string;
   fine_amount: number;
   apprehending_officer: string;
   violation_status: ViolationStatus;
