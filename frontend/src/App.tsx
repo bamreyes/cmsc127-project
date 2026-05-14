@@ -1,43 +1,30 @@
-import { useState } from 'react'
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import Header from "@/components/Header";
+import DriversPage from "@/pages/Drivers/DriversPage";
+import VehiclesPage from "@/pages/Vehicles/VehiclesPage";
+import RegistrationsPage from "@/pages/Registrations/RegistrationsPage";
+import ViolationsPage from "@/pages/Violations/ViolationsPage";
+import ReportsPage from "@/pages/Reports/ReportsPage";
 
 function App() {
-  const [name, setName] = useState('')
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Welcome to CMSC127 Project</CardTitle>
-          <CardDescription>This is a simple demo using shadcn/ui components.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Your Name</Label>
-            <Input 
-              id="name" 
-              placeholder="Enter your name" 
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </div>
-        </CardContent>
-        <CardFooter className="flex flex-col items-start space-y-4">
-          <Button className="w-full" onClick={() => alert(`Hello, ${name || 'Friend'}!`)}>
-            Say Hello
-          </Button>
-          {name && (
-            <p className="text-sm text-muted-foreground">
-              Welcome aboard, <span className="font-semibold text-foreground">{name}</span>!
-            </p>
-          )}
-        </CardFooter>
-      </Card>
-    </div>
-  )
+    <BrowserRouter>
+      <div className="min-h-screen bg-slate-50 flex flex-col">
+        <Header />
+
+        <main className="flex-1 p-8 animate-in fade-in duration-500">
+          <Routes>
+            <Route path="/" element={<Navigate to="/drivers" replace />} />
+            <Route path="/drivers" element={<DriversPage />} />
+            <Route path="/vehicles" element={<VehiclesPage />} />
+            <Route path="/registrations" element={<RegistrationsPage />} />
+            <Route path="/violations" element={<ViolationsPage />} />
+            <Route path="/reports" element={<ReportsPage />} />
+          </Routes>
+        </main>
+      </div>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;
