@@ -1,12 +1,14 @@
 import pool from "@/config/db";
-import { Driver } from "@/features/drivers/driver.model";
-import { DriverFilter } from "@/types/driver";
+import { Driver } from "@shared";
+import { DriverFilter } from "@shared";
 import { ResultSetHeader, RowDataPacket } from "mysql2/promise";
 
 export const getAllDrivers = async () => {
   const connection = await pool.getConnection();
   try {
-    const [result] = (await connection.query("SELECT * FROM drivers")) as any as [Driver[], any];
+    const [result] = (await connection.query(
+      "SELECT * FROM drivers",
+    )) as any as [Driver[], any];
     return result;
   } catch (error) {
     throw error;
@@ -151,9 +153,13 @@ export const filterDriver = async ({
       conditions.push("address LIKE ?");
       params.push(`%${address}%`);
     }
-    const where = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+    const where =
+      conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
-    const [result] = await connection.query(`SELECT * FROM drivers ${where}`, params);
+    const [result] = await connection.query(
+      `SELECT * FROM drivers ${where}`,
+      params,
+    );
 
     return result as Driver[];
   } catch (error) {
@@ -162,3 +168,4 @@ export const filterDriver = async ({
     connection.release();
   }
 };
+

@@ -1,7 +1,12 @@
 import { Request, Response } from "express";
 import * as DriverService from "@/features/drivers/driver.service";
-import { Driver } from "@/features/drivers/driver.model";
-import { LicenseType, LicenseStatus, Sex, DriverFilter } from "@/types/driver";
+import { Driver } from "@shared";
+import {
+  LicenseType,
+  LicenseStatus,
+  Sex,
+  DriverFilter,
+} from "@shared";
 
 // GET /api/drivers
 export const getAllDrivers = async (req: Request, res: Response) => {
@@ -20,13 +25,16 @@ export const getDriver = async (req: Request, res: Response) => {
   const { license_number } = req.params;
 
   if (!license_number) {
-    return res.status(400).send({ success: false, error: "License number is required" });
+    return res
+      .status(400)
+      .send({ success: false, error: "License number is required" });
   }
 
   if (typeof license_number !== "string" || license_number.trim() === "") {
-    return res
-      .status(400)
-      .send({ success: false, error: "A valid license number string is required" });
+    return res.status(400).send({
+      success: false,
+      error: "A valid license number string is required",
+    });
   }
 
   try {
@@ -34,7 +42,9 @@ export const getDriver = async (req: Request, res: Response) => {
     console.log(result);
 
     if (!result) {
-      return res.status(404).send({ success: false, message: "Driver not found" });
+      return res
+        .status(404)
+        .send({ success: false, message: "Driver not found" });
     }
 
     res.status(201).send({ success: true, data: result });
@@ -71,7 +81,9 @@ export const createDriver = async (req: Request, res: Response) => {
 
   for (const field of requiredFields) {
     if (!req.body[field]) {
-      return res.status(400).send({ success: false, message: `'${field}' is missing` });
+      return res
+        .status(400)
+        .send({ success: false, message: `'${field}' is missing` });
     }
   }
 
@@ -80,15 +92,17 @@ export const createDriver = async (req: Request, res: Response) => {
     isNaN(new Date(expires_at).getTime()) ||
     isNaN(new Date(date_of_birth).getTime())
   ) {
-    return res
-      .status(400)
-      .send({ success: false, message: "Dates must be in a valid format (YYYY-MM-DD)" });
+    return res.status(400).send({
+      success: false,
+      message: "Dates must be in a valid format (YYYY-MM-DD)",
+    });
   }
 
   if (new Date(expires_at) <= new Date(issued_at)) {
-    return res
-      .status(400)
-      .send({ success: false, error: "Expiration date cannot be on or before issuance date" });
+    return res.status(400).send({
+      success: false,
+      error: "Expiration date cannot be on or before issuance date",
+    });
   }
 
   try {
@@ -105,7 +119,11 @@ export const createDriver = async (req: Request, res: Response) => {
     } as Driver);
     console.log(result);
 
-    res.status(200).send({ success: true, message: "Driver created successfully", data: result });
+    res.status(200).send({
+      success: true,
+      message: "Driver created successfully",
+      data: result,
+    });
   } catch (error: any) {
     if (error.code === "ER_DUP_ENTRY") {
       return res.status(409).send({
@@ -123,13 +141,16 @@ export const updateDriver = async (req: Request, res: Response) => {
   const { license_number } = req.params;
 
   if (!license_number) {
-    return res.status(400).send({ success: false, message: "License number is required" });
+    return res
+      .status(400)
+      .send({ success: false, message: "License number is required" });
   }
 
   if (typeof license_number !== "string" || license_number.trim() === "") {
-    return res
-      .status(400)
-      .send({ success: false, message: "A valid license number string is required" });
+    return res.status(400).send({
+      success: false,
+      message: "A valid license number string is required",
+    });
   }
 
   const {
@@ -157,20 +178,27 @@ export const updateDriver = async (req: Request, res: Response) => {
 
   for (const field of requiredFields) {
     if (!req.body[field]) {
-      return res.status(400).send({ success: false, message: `'${field}' is missing` });
+      return res
+        .status(400)
+        .send({ success: false, message: `'${field}' is missing` });
     }
   }
 
-  if (isNaN(new Date(issued_at).getTime()) || isNaN(new Date(expires_at).getTime())) {
-    return res
-      .status(400)
-      .send({ success: false, message: "Dates must be in a valid format (YYYY-MM-DD)" });
+  if (
+    isNaN(new Date(issued_at).getTime()) ||
+    isNaN(new Date(expires_at).getTime())
+  ) {
+    return res.status(400).send({
+      success: false,
+      message: "Dates must be in a valid format (YYYY-MM-DD)",
+    });
   }
 
   if (new Date(expires_at) <= new Date(issued_at)) {
-    return res
-      .status(400)
-      .send({ success: false, message: "Expiration date cannot be on or before issuance date" });
+    return res.status(400).send({
+      success: false,
+      message: "Expiration date cannot be on or before issuance date",
+    });
   }
 
   try {
@@ -188,10 +216,16 @@ export const updateDriver = async (req: Request, res: Response) => {
     console.log(result);
 
     if (!result) {
-      return res.status(404).send({ success: false, message: "Driver not found" });
+      return res
+        .status(404)
+        .send({ success: false, message: "Driver not found" });
     }
 
-    res.status(200).send({ success: true, message: "Driver updated successfully", data: result });
+    res.status(200).send({
+      success: true,
+      message: "Driver updated successfully",
+      data: result,
+    });
   } catch (error) {
     res.status(500).send({ success: false, message: "An error occured" });
   }
@@ -202,13 +236,16 @@ export const deleteDriver = async (req: Request, res: Response) => {
   const { license_number } = req.params;
 
   if (!license_number) {
-    return res.status(400).send({ success: false, message: "License number is required" });
+    return res
+      .status(400)
+      .send({ success: false, message: "License number is required" });
   }
 
   if (typeof license_number !== "string" || license_number.trim() === "") {
-    return res
-      .status(400)
-      .send({ success: false, message: "A valid license number string is required" });
+    return res.status(400).send({
+      success: false,
+      message: "A valid license number string is required",
+    });
   }
 
   try {
@@ -216,12 +253,16 @@ export const deleteDriver = async (req: Request, res: Response) => {
     console.log(result);
 
     if (!result) {
-      return res.status(404).send({ success: false, message: "Driver not found" });
+      return res
+        .status(404)
+        .send({ success: false, message: "Driver not found" });
     }
 
-    res
-      .status(200)
-      .send({ success: true, message: "Driver successfully deleted", deleted_id: result });
+    res.status(200).send({
+      success: true,
+      message: "Driver successfully deleted",
+      deleted_id: result,
+    });
   } catch (error) {
     res.status(500).send({ success: false, message: "An error occured" });
   }
@@ -229,7 +270,8 @@ export const deleteDriver = async (req: Request, res: Response) => {
 
 // GET /api/drivers/filter/
 export const filterDrivers = async (req: Request, res: Response) => {
-  const { license_type, license_status, min_bdate, max_bdate, sex, address } = req.query;
+  const { license_type, license_status, min_bdate, max_bdate, sex, address } =
+    req.query;
 
   if (min_bdate || max_bdate) {
     const min = new Date(min_bdate as string);
@@ -260,10 +302,13 @@ export const filterDrivers = async (req: Request, res: Response) => {
       address: (address as string) ?? null,
     } as DriverFilter);
 
-    res
-      .status(200)
-      .send({ success: true, message: `Found ${result.length} driver(s)`, data: result });
+    res.status(200).send({
+      success: true,
+      message: `Found ${result.length} driver(s)`,
+      data: result,
+    });
   } catch (error) {
     res.status(500).send({ success: false, message: "An error occured" });
   }
 };
+

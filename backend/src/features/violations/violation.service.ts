@@ -1,9 +1,9 @@
 import pool from "@/config/db";
-import { TrafficViolation } from "@/features/violations/violation.model";
+import { TrafficViolation } from "@shared";
 import { ResultSetHeader, RowDataPacket } from "mysql2/promise";
-import { DriverFilter } from "@/types/driver";
-import { VehicleFilter } from "@/types/vehicle";
-import { ViolationFilter } from "@/types/violation";
+import { DriverFilter } from "@shared";
+import { VehicleFilter } from "@shared";
+import { ViolationFilter } from "@shared";
 
 export const getAllViolations = async () => {
   const connection = await pool.getConnection();
@@ -266,4 +266,6 @@ export const getTypeCountByYear = async (year: number) => {
   );
   return result as TrafficViolation[];
 };
+
+
 

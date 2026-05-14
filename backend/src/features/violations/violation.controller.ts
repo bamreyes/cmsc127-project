@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import * as ViolationService from "@/features/violations/violation.service";
-import { TrafficViolation } from "@/features/violations/violation.model";
-import { ViolationFilter, ViolationStatus } from "@/types/violation";
-import { DriverFilter, Sex, LicenseType, LicenseStatus } from "@/types/driver";
-import { VehicleFilter, VehicleType } from "@/types/vehicle";
+import { TrafficViolation } from "@shared";
+import { ViolationFilter, ViolationStatus } from "@shared";
+import { DriverFilter, Sex, LicenseType, LicenseStatus } from "@shared";
+import { VehicleFilter, VehicleType } from "@shared";
 
 export const getAllViolations = async (req: Request, res: Response) => {
   try {
@@ -435,3 +435,5 @@ export const groupTypeByYear = async (req: Request, res: Response) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
+

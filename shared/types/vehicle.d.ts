@@ -1,5 +1,17 @@
 export type VehicleType = "Motorcycle" | "Private Car" | "Public Utility Vehicle";
 
+export interface Vehicle {
+  plate_number: string;
+  engine_number: string;
+  chassis_number: string;
+  vehicle_type: VehicleType;
+  make: string;
+  model: string;
+  year: number;
+  color: string;
+  license_number: string; // References to driver
+}
+
 export interface VehicleFilter {
   plate_number?: string | null;
   engine_number?: string | null;

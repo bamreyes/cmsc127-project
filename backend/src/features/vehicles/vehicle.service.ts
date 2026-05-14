@@ -1,12 +1,14 @@
 import pool from "@/config/db";
-import { Vehicle } from "@/features/vehicles/vehicle.model";
+import { Vehicle } from "@shared";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
-import { DriverFilter } from "@/types/driver";
+import { DriverFilter } from "@shared";
 
 export const getAllVehicles = async () => {
   const connection = await pool.getConnection();
   try {
-    const [result] = (await connection.query("SELECT * FROM vehicles")) as any as [Vehicle[], any];
+    const [result] = (await connection.query(
+      "SELECT * FROM vehicles",
+    )) as any as [Vehicle[], any];
     return result;
   } catch (error) {
     throw error;
@@ -135,7 +137,8 @@ export const filterVehicleByDriver = async (driverFilter: DriverFilter) => {
     params.push(key === "street_building_house" ? `%${value}%` : value);
   });
 
-  const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+  const whereClause =
+    conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
   try {
     const [result] = await connection.query(
@@ -150,3 +153,4 @@ export const filterVehicleByDriver = async (driverFilter: DriverFilter) => {
     connection.release();
   }
 };
+

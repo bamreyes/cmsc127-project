@@ -1,7 +1,12 @@
 import { Request, Response } from "express";
 import * as VehicleService from "@/features/vehicles/vehicle.service";
-import { Vehicle } from "@/features/vehicles/vehicle.model";
-import { DriverFilter, LicenseType, LicenseStatus, Sex } from "@/types/driver";
+import { Vehicle } from "@shared";
+import {
+  DriverFilter,
+  LicenseType,
+  LicenseStatus,
+  Sex,
+} from "@shared";
 
 // GET  all vehicles
 export const getAllVehicles = async (req: Request, res: Response) => {
@@ -20,13 +25,18 @@ export const getVehicle = async (req: Request, res: Response) => {
   const { plate_number } = req.params;
 
   if (!plate_number) {
-    return res.status(400).send({ success: false, error: "Plate number is required" });
+    return res
+      .status(400)
+      .send({ success: false, error: "Plate number is required" });
   }
 
   if (typeof plate_number !== "string" || plate_number.trim() === "") {
     return res
       .status(400)
-      .send({ success: false, error: "A valid plate number string is required" });
+      .send({
+        success: false,
+        error: "A valid plate number string is required",
+      });
   }
 
   try {
@@ -34,7 +44,9 @@ export const getVehicle = async (req: Request, res: Response) => {
     console.log(result);
 
     if (!result) {
-      return res.status(404).send({ success: false, message: "Vehicle not found" });
+      return res
+        .status(404)
+        .send({ success: false, message: "Vehicle not found" });
     }
 
     res.status(200).send({ success: true, data: result });
@@ -71,7 +83,9 @@ export const createVehicle = async (req: Request, res: Response) => {
 
   for (const field of requiredFields) {
     if (!req.body[field]) {
-      return res.status(400).send({ success: false, message: `'${field}' is missing` });
+      return res
+        .status(400)
+        .send({ success: false, message: `'${field}' is missing` });
     }
   }
 
@@ -90,7 +104,13 @@ export const createVehicle = async (req: Request, res: Response) => {
 
     console.log(result);
 
-    res.status(200).send({ success: true, message: "Vehicle created successfully", data: result });
+    res
+      .status(200)
+      .send({
+        success: true,
+        message: "Vehicle created successfully",
+        data: result,
+      });
   } catch (error: any) {
     if (error.code === "ER_DUP_ENTRY") {
       return res.status(409).send({
@@ -116,17 +136,30 @@ export const updateVehicle = async (req: Request, res: Response) => {
   const { plate_number } = req.params;
 
   if (!plate_number) {
-    return res.status(400).send({ status: false, message: "Plate number is required" });
+    return res
+      .status(400)
+      .send({ status: false, message: "Plate number is required" });
   }
 
   if (typeof plate_number !== "string" || plate_number.trim() === "") {
     return res
       .status(400)
-      .send({ success: false, message: "A valid plate number string is required" });
+      .send({
+        success: false,
+        message: "A valid plate number string is required",
+      });
   }
 
-  const { engine_number, chassis_number, vehicle_type, make, model, year, color, license_number } =
-    req.body;
+  const {
+    engine_number,
+    chassis_number,
+    vehicle_type,
+    make,
+    model,
+    year,
+    color,
+    license_number,
+  } = req.body;
 
   const requiredFields = [
     "engine_number",
@@ -141,7 +174,9 @@ export const updateVehicle = async (req: Request, res: Response) => {
 
   for (const field of requiredFields) {
     if (!req.body[field]) {
-      return res.status(400).send({ success: false, message: `'${field}' is missing` });
+      return res
+        .status(400)
+        .send({ success: false, message: `'${field}' is missing` });
     }
   }
 
@@ -161,7 +196,9 @@ export const updateVehicle = async (req: Request, res: Response) => {
     console.log(result);
 
     if (!result) {
-      return res.status(404).send({ success: false, message: "Vehicle not found" });
+      return res
+        .status(404)
+        .send({ success: false, message: "Vehicle not found" });
     }
 
     res.status(200).send({
@@ -181,13 +218,18 @@ export const deleteVehicle = async (req: Request, res: Response) => {
   const { plate_number } = req.params;
 
   if (!plate_number) {
-    return res.status(400).send({ success: false, message: "Plate number is required" });
+    return res
+      .status(400)
+      .send({ success: false, message: "Plate number is required" });
   }
 
   if (typeof plate_number !== "string" || plate_number.trim() === "") {
     return res
       .status(400)
-      .send({ success: false, message: "A valid plate number string is required" });
+      .send({
+        success: false,
+        message: "A valid plate number string is required",
+      });
   }
 
   try {
@@ -195,12 +237,18 @@ export const deleteVehicle = async (req: Request, res: Response) => {
     console.log(result);
 
     if (!result) {
-      return res.status(404).send({ success: false, message: "Vehicle not found" });
+      return res
+        .status(404)
+        .send({ success: false, message: "Vehicle not found" });
     }
 
     res
       .status(200)
-      .send({ success: true, message: "Vehicle successfully deleted", deleted_id: result });
+      .send({
+        success: true,
+        message: "Vehicle successfully deleted",
+        deleted_id: result,
+      });
   } catch (error) {
     res.status(500).send({ success: false, message: "An error occured" });
   }
@@ -263,8 +311,12 @@ export const filterByDriver = async (req: Request, res: Response) => {
       max_bdate: max_bdate ? new Date(max_bdate as string) : null,
       min_issued_at: min_issued_at ? new Date(min_issued_at as string) : null,
       max_issued_at: max_issued_at ? new Date(max_issued_at as string) : null,
-      min_expires_at: min_expires_at ? new Date(min_expires_at as string) : null,
-      max_expires_at: max_expires_at ? new Date(max_expires_at as string) : null,
+      min_expires_at: min_expires_at
+        ? new Date(min_expires_at as string)
+        : null,
+      max_expires_at: max_expires_at
+        ? new Date(max_expires_at as string)
+        : null,
     };
 
     const vMin = min_date ? new Date(min_date as string) : null;
@@ -278,6 +330,9 @@ export const filterByDriver = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (error) {
-    res.status(500).send({ success: false, message: "An error occurred", error });
+    res
+      .status(500)
+      .send({ success: false, message: "An error occurred", error });
   }
 };
+

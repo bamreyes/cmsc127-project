@@ -1,6 +1,6 @@
 import pool from "@/config/db";
-import { VehicleRegistration } from "@/features/registrations/registration.model";
-import { RegistrationFilter } from "@/types/registration";
+import { VehicleRegistration } from "@shared";
+import { RegistrationFilter } from "@shared";
 import { ResultSetHeader, RowDataPacket } from "mysql2/promise";
 
 // GET registrations
@@ -8,10 +8,9 @@ export const getAllRegistrations = async () => {
   const connection = await pool.getConnection();
 
   try {
-    const [result] = (await connection.query("SELECT * FROM vehicle_registrations")) as any as [
-      VehicleRegistration[],
-      any,
-    ];
+    const [result] = (await connection.query(
+      "SELECT * FROM vehicle_registrations",
+    )) as any as [VehicleRegistration[], any];
 
     return result as VehicleRegistration[];
   } catch (error) {
@@ -79,7 +78,9 @@ export const getExpiredRegistrations = async () => {
 };
 
 // POST registration
-export const createRegistration = async (vehicle_registration: VehicleRegistration) => {
+export const createRegistration = async (
+  vehicle_registration: VehicleRegistration,
+) => {
   const connection = await pool.getConnection();
 
   try {
@@ -108,7 +109,9 @@ export const createRegistration = async (vehicle_registration: VehicleRegistrati
 };
 
 // PUT registration BY registration_number
-export const updateRegistration = async (vehicle_registration: VehicleRegistration) => {
+export const updateRegistration = async (
+  vehicle_registration: VehicleRegistration,
+) => {
   const connection = await pool.getConnection();
 
   try {
@@ -176,3 +179,4 @@ export const <function name> = async (<paramters here>) => {
   }
 };
 */
+
