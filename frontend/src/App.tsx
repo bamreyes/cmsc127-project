@@ -6,6 +6,8 @@ import RegistrationsPage from "@/pages/Registrations/RegistrationsPage";
 import ViolationsPage from "@/pages/Violations/ViolationsPage";
 import ReportsPage from "@/pages/Reports/ReportsPage";
 
+import { Toaster } from "sonner";
+
 function App() {
   return (
     <BrowserRouter>
@@ -22,6 +24,7 @@ function App() {
             <Route path="/reports" element={<ReportsPage />} />
           </Routes>
         </main>
+        <Toaster richColors position="top-right" />
       </div>
     </BrowserRouter>
   );

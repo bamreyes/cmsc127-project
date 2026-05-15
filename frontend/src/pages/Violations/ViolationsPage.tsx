@@ -1,17 +1,108 @@
+import { useEffect, useState, useCallback } from "react";
+import type { TrafficViolation } from "@shared";
+import { DataTable } from "@/components/DataTable";
+import { getViolationColumns } from "@/components/TableColumns";
+import { api } from "@/lib/api";
+import { toast } from "sonner";
+import { DeleteDialog } from "@/components/DeleteDialog";
+
 const ViolationsPage = () => {
+  const [violations, setViolations] = useState<TrafficViolation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean;
+    violation_id: string | number;
+  }>({
+    isOpen: false,
+    violation_id: "",
+  });
+
+  const fetchViolations = useCallback(async () => {
+    try {
+      const [violRes, drvRes] = await Promise.all([
+        api("/violations"),
+        api("/drivers"),
+      ]);
+
+      if (violRes.ok && drvRes.ok) {
+        const violResult = await violRes.json();
+        const drvResult = await drvRes.json();
+
+        const drivers = drvResult.data || [];
+        const violationsData = violResult.data || [];
+
+        const mappedViolations = violationsData.map((v: any) => {
+          const violator = drivers.find(
+            (d: any) => d.license_number === v.license_number,
+          );
+          return {
+            ...v,
+            violator_name: violator?.full_name,
+          };
+        });
+
+        setViolations(mappedViolations);
+      }
+    } catch (error) {
+      console.error("Failed to fetch violations:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchViolations();
+  }, [fetchViolations]);
+
+  const handleDeleteClick = (violation_id: string | number) => {
+    setDeleteModal({ isOpen: true, violation_id });
+  };
+
+  const confirmDelete = async () => {
+    const { violation_id } = deleteModal;
+    setDeleteModal((prev) => ({ ...prev, isOpen: false }));
+
+    try {
+      console.log("Delete violation", violation_id);
+      const response = await api(`/violations/${violation_id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Error: ${response.statusText}`);
+      }
+
+      toast.success("Violation deleted successfully");
+
+      await fetchViolations();
+    } catch (error) {
+      toast.error("Failed to delete violation", {
+        description:
+          error instanceof Error
+            ? error.message
+            : "An unexpected error occurred",
+      });
+    }
+  };
+
   return (
-    <div className="w-full space-y-6">
-      <div className="flex flex-col gap-1">
-        <h2 className="text-3xl font-bold tracking-tight text-slate-900">Violations</h2>
-        <p className="text-slate-500">Monitor traffic violations, fines, and driver demerit points.</p>
-      </div>
-      
-      <div className="h-[400px] w-full rounded-3xl border-2 border-dashed border-slate-200 bg-white/50 flex items-center justify-center">
-        <div className="text-center space-y-2">
-          <p className="text-lg font-semibold text-slate-400 uppercase tracking-widest">Violations Tracker Coming Soon</p>
-          <p className="text-sm text-slate-400">Issue new citations and track payment status.</p>
+    <div className="w-full space-y-6 p-6">
+      {loading ? (
+        <div className="flex h-64 items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-300 border-t-slate-900" />
         </div>
-      </div>
+      ) : (
+        <DataTable columns={getViolationColumns(handleDeleteClick)} data={violations} title="Violations" />
+      )}
+
+      <DeleteDialog
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal((prev) => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmDelete}
+        entityName="Violation"
+        entityId={deleteModal.violation_id}
+      />
     </div>
   );
 };

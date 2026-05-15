@@ -1,17 +1,125 @@
+import { useEffect, useState, useCallback } from "react";
+import type { Driver } from "@shared";
+import { DataTable } from "@/components/DataTable";
+import { getDriverColumns } from "@/components/TableColumns";
+import { api } from "@/lib/api";
+import { toast } from "sonner";
+import { DeleteDialog } from "@/components/DeleteDialog";
+
 const DriversPage = () => {
-  return (
-    <div className="w-full space-y-6">
-      <div className="flex flex-col gap-1">
-        <h2 className="text-3xl font-bold tracking-tight text-slate-900">Drivers</h2>
-        <p className="text-slate-500">Manage and view all registered drivers in the system.</p>
-      </div>
+  const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean;
+    license_number: string;
+    warningMessage: string | null;
+    affectedItems: string[];
+  }>({
+    isOpen: false,
+    license_number: "",
+    warningMessage: null,
+    affectedItems: [],
+  });
+
+  const fetchDrivers = useCallback(async () => {
+    try {
+      const response = await api("/drivers");
+      if (response.ok) {
+        const result = await response.json();
+        setDrivers(result.data || []);
+      }
+    } catch (error) {
+      console.error("Failed to fetch drivers:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchDrivers();
+  }, [fetchDrivers]);
+
+  const handleDeleteClick = async (license_number: string) => {
+    try {
+      const depsResponse = await api(`/vehicles/filter/driver?license_number=${license_number}`);
+      let warningMessage = null;
+      let affectedItems: string[] = [];
       
-      <div className="h-[400px] w-full rounded-3xl border-2 border-dashed border-slate-200 bg-white/50 flex items-center justify-center">
-        <div className="text-center space-y-2">
-          <p className="text-lg font-semibold text-slate-400 uppercase tracking-widest">Drivers List Coming Soon</p>
-          <p className="text-sm text-slate-400">Initialize TanStack Table here.</p>
+      if (depsResponse.ok) {
+        const depsData = await depsResponse.json();
+        const vehicles = depsData.data || [];
+        const vehiclesCount = vehicles.length;
+        
+        if (vehiclesCount > 0) {
+          affectedItems = vehicles.map((v: any) => v.plate_number);
+          warningMessage = `This driver currently has ${vehiclesCount} vehicle(s) registered under their name.\n\nIf you proceed with deletion, these vehicles will become unassigned.`;
+        }
+      }
+      
+      setDeleteModal({
+        isOpen: true,
+        license_number,
+        warningMessage,
+        affectedItems,
+      });
+    } catch (error) {
+      console.error("Failed to check dependencies:", error);
+      setDeleteModal({
+        isOpen: true,
+        license_number,
+        warningMessage: null,
+        affectedItems: [],
+      });
+    }
+  };
+
+  const confirmDelete = async () => {
+    const { license_number } = deleteModal;
+    setDeleteModal(prev => ({ ...prev, isOpen: false }));
+
+    try {
+      console.log("Delete driver", license_number);
+      const response = await api(`/drivers/${license_number}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Error: ${response.statusText}`);
+      }
+
+      toast.success("Driver deleted successfully");
+
+      await fetchDrivers();
+    } catch (error) {
+      toast.error("Failed to delete driver", {
+        description:
+          error instanceof Error
+            ? error.message
+            : "An unexpected error occurred",
+      });
+    }
+  };
+
+  return (
+    <div className="w-full space-y-6 p-6">
+      {loading ? (
+        <div className="flex h-64 items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-300 border-t-slate-900" />
         </div>
-      </div>
+      ) : (
+        <DataTable columns={getDriverColumns(handleDeleteClick)} data={drivers} title="Drivers" />
+      )}
+
+      <DeleteDialog
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmDelete}
+        entityName="Driver"
+        entityId={deleteModal.license_number}
+        warningMessage={deleteModal.warningMessage}
+        affectedItems={deleteModal.affectedItems}
+      />
     </div>
   );
 };

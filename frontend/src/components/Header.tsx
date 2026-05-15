@@ -39,7 +39,7 @@ const Header = () => {
           </div>
         </NavLink>
 
-        <nav className="flex items-center gap-1 bg-slate-50/50 p-1 rounded-xl border border-slate-100">
+        <nav className="group flex items-center bg-slate-50/50 p-1 rounded-xl border border-slate-100 transition-all duration-300">
           {tabs.map((tab) => {
             return (
               <NavLink
@@ -47,10 +47,10 @@ const Header = () => {
                 to={tab.path}
                 className={({ isActive }) =>
                   cn(
-                    "flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-bold outline-none",
+                    "flex items-center justify-center rounded-lg text-sm font-bold outline-none whitespace-nowrap overflow-hidden transition-all duration-300 ease-in-out",
                     isActive
-                      ? "bg-white text-blue-600 border border-slate-200 ring-1 ring-slate-50"
-                      : "text-slate-500 hover:text-slate-900 hover:bg-white/50",
+                      ? "bg-white text-blue-600 border border-slate-200 ring-1 ring-slate-50 px-4 py-2.5 max-w-[200px] mx-0.5 opacity-100"
+                      : "border border-transparent text-slate-500 hover:text-slate-900 hover:bg-white/50 px-0 py-2.5 max-w-0 mx-0 opacity-0 group-hover:max-w-[200px] group-hover:px-4 group-hover:mx-0.5 group-hover:opacity-100"
                   )
                 }
               >
