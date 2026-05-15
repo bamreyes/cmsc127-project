@@ -10,6 +10,7 @@ export interface Vehicle {
   year: number;
   color: string;
   license_number: string; // References to driver
+  owner_name?: string; // Fetched via JOIN
 }
 
 export interface VehicleFilter {

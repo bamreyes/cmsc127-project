@@ -10,6 +10,7 @@ export interface TrafficViolation {
   violation_type: string;
   license_number: string; // References to driver
   plate_number: string; // References to vehicle
+  violator_name?: string; // Not in the table
 }
 
 export interface ViolationFilter {
