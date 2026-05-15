@@ -5,6 +5,7 @@ import VehiclesPage from "@/pages/Vehicles/VehiclesPage";
 import RegistrationsPage from "@/pages/Registrations/RegistrationsPage";
 import ViolationsPage from "@/pages/Violations/ViolationsPage";
 import ReportsPage from "@/pages/Reports/ReportsPage";
+import { CreateDriverModal } from "@/components/modals/CreateModal";
 
 import { Toaster } from "sonner";
 
@@ -21,6 +22,7 @@ function App() {
             <Route path="/vehicles" element={<VehiclesPage />} />
             <Route path="/registrations" element={<RegistrationsPage />} />
             <Route path="/violations" element={<ViolationsPage />} />
+            <Route path="/test" element={<CreateDriverModal isOpen={true} onClose={() => {}} />} />
             <Route path="/reports" element={<ReportsPage />} />
           </Routes>
         </main>

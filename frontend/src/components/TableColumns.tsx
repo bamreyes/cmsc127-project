@@ -28,6 +28,8 @@ const formatDate = (val: any) => {
     day: "2-digit",
   });
 };
+import { EditDriverModal } from "./modals/EditModal";
+import { useState } from "react";
 
 // --- Driver Columns ---
 export const getDriverColumns = (
@@ -77,33 +79,40 @@ export const getDriverColumns = (
     header: "Actions",
     cell: ({ row }) => {
       const driver = row.original;
+      const [editModalOpen, setEditModalOpen] = useState(false);
 
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={() => console.log("Edit driver", driver.license_number)}
-            >
-              <Pencil className="mr-2 h-4 w-4" />
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => onDelete(driver.license_number)}
-              className="text-red-600 focus:text-red-600"
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="h-8 w-8 p-0">
+                        <span className="sr-only">Open menu</span>
+                        <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+
+                    <DropdownMenuSeparator />
+
+                    <DropdownMenuItem onClick={() => setEditModalOpen(true)}>
+                        <Pencil className="mr-2 h-4 w-4" />
+                        Edit
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem onClick={() => onDelete(driver.license_number)} className="text-red-600 focus:text-red-600">
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Delete
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+
+            <EditDriverModal
+                isOpen={editModalOpen}
+                onClose={() => setEditModalOpen(false)}
+            />
+        </>
       );
     },
   },

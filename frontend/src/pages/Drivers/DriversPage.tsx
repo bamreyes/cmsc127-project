@@ -5,10 +5,14 @@ import { getDriverColumns } from "@/components/TableColumns";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { DeleteDialog } from "@/components/DeleteDialog";
+import { FilterDriverModal } from "@/components/modals/FilterModal.tsx";
+import { CreateDriverModal } from "@/components/modals/CreateModal";
 
 const DriversPage = () => {
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filterModalOpen, setFilterModalOpen] = useState(false);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
   const [deleteModal, setDeleteModal] = useState<{
     isOpen: boolean;
     license_number: string;
@@ -108,7 +112,7 @@ const DriversPage = () => {
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-300 border-t-slate-900" />
         </div>
       ) : (
-        <DataTable columns={getDriverColumns(handleDeleteClick)} data={drivers} title="Drivers" />
+        <DataTable columns={getDriverColumns(handleDeleteClick)} data={drivers} title="Drivers" onFilterClick={() => setFilterModalOpen(true)} onAddNewClick={() => setCreateModalOpen(true)} />
       )}
 
       <DeleteDialog
@@ -119,6 +123,16 @@ const DriversPage = () => {
         entityId={deleteModal.license_number}
         warningMessage={deleteModal.warningMessage}
         affectedItems={deleteModal.affectedItems}
+      />
+
+      <FilterDriverModal
+        isOpen={filterModalOpen}
+        onClose={() => setFilterModalOpen(false)}
+      />
+
+      <CreateDriverModal
+        isOpen={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
       />
     </div>
   );
