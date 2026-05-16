@@ -75,7 +75,7 @@ export function RegistrationForm({ mode }: { mode: "create" | "edit" | "search" 
                     {mode === "search" ? (
                         <Field>
                             <div className = "flex flex-col gap-4">
-                                <div className = "flex flex-row gap-3">
+                                <div className = "flex flex-row gap-3 -mt-2.5">
                                     <Checkbox id = "registration-checkbox-active" name = "registration-checkbox-active" />
                                     <Label className = "font-normal" htmlFor = "registration-checkbox-active">Active</Label>
                                 </div>
@@ -85,7 +85,7 @@ export function RegistrationForm({ mode }: { mode: "create" | "edit" | "search" 
                                     <Label className = "font-normal" htmlFor = "registration-checkbox-expired">Expired</Label>
                                 </div>
                                 
-                                <div className = "flex flex-row gap-3 -mt-2.5">
+                                <div className = "flex flex-row gap-3">
                                     <Checkbox id = "registration-checkbox-suspended" name = "registration-checkbox-suspended" />
                                     <Label className = "font-normal" htmlFor = "registration-checkbox-suspended">Suspended</Label>
                                 </div>

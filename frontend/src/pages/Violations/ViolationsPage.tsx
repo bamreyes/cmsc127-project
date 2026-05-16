@@ -5,11 +5,13 @@ import { getViolationColumns } from "@/components/TableColumns";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { DeleteDialog } from "@/components/DeleteDialog";
+import { FilterViolationModal } from "@/components/modals/FilterModal";
 import { CreateViolationModal } from "@/components/modals/CreateModal";
 
 const ViolationsPage = () => {
   const [violations, setViolations] = useState<TrafficViolation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filterModalOpen, setFilterModalOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [deleteModal, setDeleteModal] = useState<{
     isOpen: boolean;
@@ -95,7 +97,7 @@ const ViolationsPage = () => {
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-300 border-t-slate-900" />
         </div>
       ) : (
-        <DataTable columns={getViolationColumns(handleDeleteClick)} data={violations} title="Violations" onAddNewClick={() => setCreateModalOpen(true)} />
+        <DataTable columns={getViolationColumns(handleDeleteClick)} data={violations} title="Violations" onFilterClick={() => setFilterModalOpen(true)} onAddNewClick={() => setCreateModalOpen(true)} />
       )}
 
       <DeleteDialog
@@ -104,6 +106,11 @@ const ViolationsPage = () => {
         onConfirm={confirmDelete}
         entityName="Violation"
         entityId={deleteModal.violation_id}
+      />
+
+      <FilterViolationModal
+        isOpen={filterModalOpen}
+        onClose={() => setFilterModalOpen(false)}
       />
 
       <CreateViolationModal

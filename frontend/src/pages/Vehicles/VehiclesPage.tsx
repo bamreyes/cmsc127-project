@@ -5,11 +5,13 @@ import { getVehicleColumns } from "@/components/TableColumns";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { DeleteDialog } from "@/components/DeleteDialog";
+import { FilterVehicleModal } from "@/components/modals/FilterModal";
 import { CreateVehicleModal } from "@/components/modals/CreateModal";
 
 const VehiclesPage = () => {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filterModalOpen, setFilterModalOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [deleteModal, setDeleteModal] = useState<{
     isOpen: boolean;
@@ -95,7 +97,7 @@ const VehiclesPage = () => {
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-300 border-t-slate-900" />
         </div>
       ) : (
-        <DataTable columns={getVehicleColumns(handleDeleteClick)} data={vehicles} title="Vehicles" onAddNewClick={() => setCreateModalOpen(true)}/>
+        <DataTable columns={getVehicleColumns(handleDeleteClick)} data={vehicles} title="Vehicles" onFilterClick={() => setFilterModalOpen(true)} onAddNewClick={() => setCreateModalOpen(true)}/>
       )}
 
       <DeleteDialog
@@ -105,6 +107,11 @@ const VehiclesPage = () => {
         entityName="Vehicle"
         entityId={deleteModal.plate_number}
       />
+      
+    <FilterVehicleModal
+        isOpen={filterModalOpen}
+        onClose={() => setFilterModalOpen(false)}
+    />
 
       <CreateVehicleModal
         isOpen={createModalOpen}

@@ -141,7 +141,7 @@ export function VehicleForm({ mode }: { mode: "create" | "edit" | "search" }) {
                     {mode === "search" ? (
                         <Field>
                             <div className = "flex flex-col gap-4">
-                                <div className = "flex flex-row gap-3">
+                                <div className = "flex flex-row gap-3 -mt-2.5">
                                     <Checkbox id = "vehicle-checkbox-private" name = "vehicle-checkbox-private" />
                                     <Label className = "font-normal" htmlFor = "vehicle-checkbox-private">Private Car</Label>
                                 </div>
@@ -151,7 +151,7 @@ export function VehicleForm({ mode }: { mode: "create" | "edit" | "search" }) {
                                     <Label className = "font-normal" htmlFor = "vehicle-checkbox-puv">Public Utility Vehicle</Label>
                                 </div>
                                 
-                                <div className = "flex flex-row gap-3 -mt-2.5">
+                                <div className = "flex flex-row gap-3">
                                     <Checkbox id = "vehicle-checkbox-motor" name = "vehicle-checkbox-motor" />
                                     <Label className = "font-normal" htmlFor = "vehicle-checkbox-motor">Motorcycle</Label>
                                 </div>
