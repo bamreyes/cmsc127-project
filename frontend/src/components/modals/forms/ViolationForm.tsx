@@ -35,7 +35,7 @@ export function ViolationForm({ mode }: { mode: "create" | "edit" | "search" }) 
                         <FieldLabel>Date *</FieldLabel>
                     )}
 
-                    <DatePicker></DatePicker>
+                    <DatePicker required = {mode !== "search"}></DatePicker>
                 </FieldSet>
 
                 <FieldSet className = "gap-y-2">
@@ -116,7 +116,7 @@ export function ViolationForm({ mode }: { mode: "create" | "edit" | "search" }) 
 
                     <Field>
                         <Input
-                            placeholder = "0001"
+                            placeholder = "1000"
                             className = "rounded-md text-sm"
                             type = "number"
                             min = {0}

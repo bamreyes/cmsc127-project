@@ -51,7 +51,7 @@ export function DriverForm({ mode }: { mode: "create" | "edit" | "search" }) {
                         <FieldLabel>Birthdate *</FieldLabel>
                     )}
 
-                    <DatePicker></DatePicker>
+                    <DatePicker required = {mode !== "search"}></DatePicker>
                 </FieldSet>
 
                 <FieldSet>
@@ -236,7 +236,7 @@ export function DriverForm({ mode }: { mode: "create" | "edit" | "search" }) {
                         <FieldLabel>License Issued *</FieldLabel>
                     )}
 
-                    <DatePicker></DatePicker>
+                    <DatePicker required = {mode !== "search"}></DatePicker>
                 </FieldSet>
 
                 <FieldSet className = "flex-row justify-between">
@@ -246,7 +246,7 @@ export function DriverForm({ mode }: { mode: "create" | "edit" | "search" }) {
                         <FieldLabel>Expiry Date *</FieldLabel>
                     )}
 
-                    <DatePicker></DatePicker>
+                    <DatePicker required = {mode !== "search"}></DatePicker>
                 </FieldSet>
             </FieldGroup>
         </>

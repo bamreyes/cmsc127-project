@@ -124,7 +124,7 @@ export function RegistrationForm({ mode }: { mode: "create" | "edit" | "search" 
                         <FieldLabel>Registration Date *</FieldLabel>
                     )}
 
-                    <DatePicker></DatePicker>
+                    <DatePicker required = {mode !== "search"}></DatePicker>
                 </FieldSet>
 
                 <FieldSet className = "flex-row justify-between">
@@ -134,7 +134,7 @@ export function RegistrationForm({ mode }: { mode: "create" | "edit" | "search" 
                         <FieldLabel>Expiration Date *</FieldLabel>
                     )}
 
-                    <DatePicker></DatePicker>
+                    <DatePicker required = {mode !== "search"}></DatePicker>
                 </FieldSet>
             </FieldGroup>
         </>
