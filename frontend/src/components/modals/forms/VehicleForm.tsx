@@ -40,7 +40,7 @@ export function VehicleForm({ mode }: { mode: "create" | "edit" | "search" }) {
                             required = {mode !== "search"}
                         />
                     </Field>
-                    <FieldDescription className = "text-xs">Enter license and include hyphens.</FieldDescription>
+                    <FieldDescription className = "text-xs">Enter license no. and include hyphens.</FieldDescription>
                 </FieldSet>
 
                 <FieldSet className = "gap-y-2">
@@ -126,6 +126,7 @@ export function VehicleForm({ mode }: { mode: "create" | "edit" | "search" }) {
                             min = {1886}
                             max = {2026}
                             step = {1}
+                            required = {mode !== "search"}
                         />
                     </Field>
                 </FieldSet>

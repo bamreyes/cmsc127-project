@@ -24,6 +24,7 @@ export function RegistrationForm({ mode }: { mode: "create" | "edit" | "search" 
                             type = "number"
                             min = {0}
                             step = {1}
+                            required = {mode !== "search"}
                         />
                     </Field>
                 </FieldSet>  

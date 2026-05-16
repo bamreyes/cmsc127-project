@@ -121,6 +121,7 @@ export function ViolationForm({ mode }: { mode: "create" | "edit" | "search" }) 
                             type = "number"
                             min = {0}
                             step = {0.01}
+                            required = {mode !== "search"}
                         />
                     </Field>
                 </FieldSet>  
