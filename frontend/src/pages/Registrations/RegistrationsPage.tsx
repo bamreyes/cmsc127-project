@@ -5,10 +5,12 @@ import { getRegistrationColumns } from "@/components/TableColumns";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { DeleteDialog } from "@/components/DeleteDialog";
+import { CreateRegistrationModal } from "@/components/modals/CreateModal";
 
 const RegistrationsPage = () => {
   const [registrations, setRegistrations] = useState<VehicleRegistration[]>([]);
   const [loading, setLoading] = useState(true);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
   const [deleteModal, setDeleteModal] = useState<{
     isOpen: boolean;
     registration_number: string | number;
@@ -96,7 +98,7 @@ const RegistrationsPage = () => {
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-300 border-t-slate-900" />
         </div>
       ) : (
-        <DataTable columns={getRegistrationColumns(handleDeleteClick)} data={registrations} title="Registrations" />
+        <DataTable columns={getRegistrationColumns(handleDeleteClick)} data={registrations} title="Registrations" onAddNewClick={() => setCreateModalOpen(true)} />
       )}
 
       <DeleteDialog
@@ -105,6 +107,11 @@ const RegistrationsPage = () => {
         onConfirm={confirmDelete}
         entityName="Registration"
         entityId={deleteModal.registration_number}
+      />
+
+      <CreateRegistrationModal
+        isOpen={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
       />
     </div>
   );

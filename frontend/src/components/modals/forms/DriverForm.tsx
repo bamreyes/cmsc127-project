@@ -21,6 +21,7 @@ export function DriverForm({ mode }: { mode: "create" | "edit" | "search" }) {
                         <Input
                             placeholder = "N01-12-345678"
                             className = "rounded-md text-sm"
+                            required = {mode !== "search"}
                         />
                     </Field>
                     <FieldDescription className = "text-xs">Include hyphens.</FieldDescription>
@@ -35,11 +36,12 @@ export function DriverForm({ mode }: { mode: "create" | "edit" | "search" }) {
 
                     <Field>
                         <Input
-                            placeholder = "Juan Dela Cruz"
+                            placeholder = "Juan dela Cruz"
                             className = "rounded-md text-sm"
+                            required = {mode !== "search"}
                         />
                     </Field>
-                    <FieldDescription className = "text-xs">Separate with spaces.</FieldDescription>
+                    <FieldDescription className = "text-xs">Separate first, middle, and last name with spaces.</FieldDescription>
                 </FieldSet>
 
                 <FieldSet className = "flex-row justify-between">
@@ -64,12 +66,12 @@ export function DriverForm({ mode }: { mode: "create" | "edit" | "search" }) {
                             <div className = "flex flex-col gap-4">
                                 <div className = "flex flex-row gap-3 -mt-2.5">
                                     <Checkbox id = "gender-checkbox-m" name = "gender-checkbox-m" />
-                                    <Label htmlFor = "gender-checkbox-m">M</Label>
+                                    <Label className = "font-normal" htmlFor = "gender-checkbox-m font-normal">M</Label>
                                 </div>
 
                                 <div className = "flex flex-row gap-3">
                                     <Checkbox id = "gender-checkbox-f" name = "gender-checkbox-f" />
-                                    <Label htmlFor = "gender-checkbox-f">F</Label>
+                                    <Label className = "font-normal" htmlFor = "gender-checkbox-f">F</Label>
                                 </div>
                             </div>
                         </Field>
@@ -103,6 +105,7 @@ export function DriverForm({ mode }: { mode: "create" | "edit" | "search" }) {
                         <Input
                             placeholder = "123 Rizal St, Sampaloc, Manila"
                             className = "rounded-md text-sm"
+                            required = {mode !== "search"}
                         />
                     </Field>
                     <FieldDescription className = "text-xs">Separate with commas.</FieldDescription>
@@ -122,17 +125,17 @@ export function DriverForm({ mode }: { mode: "create" | "edit" | "search" }) {
                             <div className = "flex flex-col gap-4">
                                 <div className = "flex flex-row gap-3 -mt-2.5">
                                     <Checkbox id = "license-checkbox-nonpro" name = "license-checkbox-nonpro" />
-                                    <Label htmlFor = "license-checkbox-nonpro">Non-Professional</Label>
+                                    <Label className = "font-normal" htmlFor = "license-checkbox-nonpro">Non-Professional</Label>
                                 </div>
 
                                 <div className = "flex flex-row gap-3">
                                     <Checkbox id = "license-checkbox-pro" name = "license-checkbox-pro" />
-                                    <Label htmlFor = "license-checkbox-pro">Professional</Label>
+                                    <Label className = "font-normal" htmlFor = "license-checkbox-pro">Professional</Label>
                                 </div>
 
                                 <div className = "flex flex-row gap-3">
                                     <Checkbox id = "license-checkbox-student" name = "license-checkbox-student" />
-                                    <Label htmlFor = "license-checkbox-student">Student Permit</Label>
+                                    <Label className = "font-normal" htmlFor = "license-checkbox-student">Student Permit</Label>
                                 </div>
                             </div>
                         </Field>
@@ -140,7 +143,7 @@ export function DriverForm({ mode }: { mode: "create" | "edit" | "search" }) {
                         <RadioGroup defaultValue = "Non-Professional">
                             <Field orientation = "horizontal">
                                 <RadioGroupItem value = "Non-Professional" id = "license-nonpro" />
-                                <FieldLabel htmlFor = "license-non-pro" className = "font-normal">
+                                <FieldLabel htmlFor = "license-nonpro" className = "font-normal">
                                     Non-Professional
                                 </FieldLabel>
                             </Field>
@@ -174,22 +177,22 @@ export function DriverForm({ mode }: { mode: "create" | "edit" | "search" }) {
                             <div className = "flex flex-col gap-4">
                                 <div className = "flex flex-row gap-3 -mt-2.5">
                                     <Checkbox id = "license-checkbox-valid" name = "license-checkbox-valid" />
-                                    <Label htmlFor = "license-checkbox-valid">Valid</Label>
+                                    <Label className = "font-normal" htmlFor = "license-checkbox-valid">Valid</Label>
                                 </div>
 
                                 <div className = "flex flex-row gap-3">
                                     <Checkbox id = "license-checkbox-expired" name = "license-checkbox-expired" />
-                                    <Label htmlFor = "license-checkbox-expired">Expired</Label>
+                                    <Label className = "font-normal" htmlFor = "license-checkbox-expired">Expired</Label>
                                 </div>
 
                                 <div className = "flex flex-row gap-3">
                                     <Checkbox id = "license-checkbox-suspended" name = "license-checkbox-suspended" />
-                                    <Label htmlFor = "license-checkbox-suspended">Suspended</Label>
+                                    <Label className = "font-normal" htmlFor = "license-checkbox-suspended">Suspended</Label>
                                 </div>
 
                                 <div className = "flex flex-row gap-3">
                                     <Checkbox id = "license-checkbox-revoked" name = "license-checkbox-revoked" />
-                                    <Label htmlFor = "license-checkbox-revoked">Revoked</Label>
+                                    <Label className = "font-normal" htmlFor = "license-checkbox-revoked">Revoked</Label>
                                 </div>
                             </div>
                         </Field>

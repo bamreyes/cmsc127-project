@@ -5,10 +5,12 @@ import { getVehicleColumns } from "@/components/TableColumns";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { DeleteDialog } from "@/components/DeleteDialog";
+import { CreateVehicleModal } from "@/components/modals/CreateModal";
 
 const VehiclesPage = () => {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
   const [deleteModal, setDeleteModal] = useState<{
     isOpen: boolean;
     plate_number: string;
@@ -93,7 +95,7 @@ const VehiclesPage = () => {
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-300 border-t-slate-900" />
         </div>
       ) : (
-        <DataTable columns={getVehicleColumns(handleDeleteClick)} data={vehicles} title="Vehicles" />
+        <DataTable columns={getVehicleColumns(handleDeleteClick)} data={vehicles} title="Vehicles" onAddNewClick={() => setCreateModalOpen(true)}/>
       )}
 
       <DeleteDialog
@@ -102,6 +104,11 @@ const VehiclesPage = () => {
         onConfirm={confirmDelete}
         entityName="Vehicle"
         entityId={deleteModal.plate_number}
+      />
+
+      <CreateVehicleModal
+        isOpen={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
       />
     </div>
   );
