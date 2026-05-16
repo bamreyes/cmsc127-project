@@ -35,6 +35,7 @@ import { useState } from "react";
 // --- Driver Columns ---
 export const getDriverColumns = (
   onDelete: (id: string) => void,
+  onEdit: (driver: Driver) => void
 ): ColumnDef<Driver>[] => [
   {
     accessorKey: "license_number",
@@ -75,48 +76,33 @@ export const getDriverColumns = (
     header: "Expiry Date",
     cell: ({ getValue }) => formatDate(getValue()),
   },
-  {
-    id: "actions",
-    header: "Actions",
-    cell: ({ row }) => {
-      const driver = row.original;
-      const [editModalOpen, setEditModalOpen] = useState(false);
-
-      return (
-        <>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-
-              <DropdownMenuSeparator />
-
-              <DropdownMenuItem onClick={() => setEditModalOpen(true)}>
-                <Pencil className="mr-2 h-4 w-4" />
-                Edit
-              </DropdownMenuItem>
-
-              <DropdownMenuItem onClick={() => onDelete(driver.license_number)} className="text-red-600 focus:text-red-600">
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          <EditDriverModal
-            isOpen={editModalOpen}
-            onClose={() => setEditModalOpen(false)}
-          />
-        </>
-      );
-    },
-  },
+    {
+        id: "actions",
+        cell: ({ row }) => {
+            const driver = row.original;
+            return (
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant = "ghost" className = "h-8 w-8 p-0">
+                            <MoreHorizontal className = "h-4 w-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align = "end">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick = {() => onEdit(driver)}>
+                            <Pencil className = "mr-2 h-4 w-4" />
+                            Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick = {() => onDelete(driver.license_number)} className = "text-red-600 focus:text-red-600">
+                            <Trash2 className = "mr-2 h-4 w-4" />
+                            Delete
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            );
+        },
+    }
 ];
 
 // --- Vehicle Columns ---

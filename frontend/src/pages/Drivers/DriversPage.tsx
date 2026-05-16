@@ -7,12 +7,14 @@ import { toast } from "sonner";
 import { DeleteDialog } from "@/components/DeleteDialog";
 import { FilterDriverModal } from "@/components/modals/FilterModal.tsx";
 import { CreateDriverModal } from "@/components/modals/CreateModal";
+import { EditDriverModal } from "@/components/modals/EditModal";
 
 const DriversPage = () => {
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterModalOpen, setFilterModalOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
+
   const [deleteModal, setDeleteModal] = useState<{
     isOpen: boolean;
     license_number: string;
@@ -24,6 +26,15 @@ const DriversPage = () => {
     warningMessage: null,
     affectedItems: [],
   });
+
+  const [editModal, setEditModal] = useState<{ isOpen: boolean; driver: Driver | null }>({
+    isOpen: false,
+    driver: null,
+  });
+
+  const handleEditClick = (driver: Driver) => {
+    setEditModal({ isOpen: true, driver });
+  };
 
   const fetchDrivers = useCallback(async () => {
     try {
@@ -112,7 +123,13 @@ const DriversPage = () => {
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-300 border-t-slate-900" />
         </div>
       ) : (
-        <DataTable columns={getDriverColumns(handleDeleteClick)} data={drivers} title="Drivers" onFilterClick={() => setFilterModalOpen(true)} onAddNewClick={() => setCreateModalOpen(true)} />
+        <DataTable
+          columns = {getDriverColumns(handleDeleteClick, handleEditClick)}
+          data = {drivers}
+          title = "Drivers"
+          onFilterClick = {() => setFilterModalOpen(true)}
+          onAddNewClick = {() => setCreateModalOpen(true)}
+        />
       )}
 
       <DeleteDialog
@@ -126,14 +143,25 @@ const DriversPage = () => {
       />
 
       <FilterDriverModal
-        isOpen={filterModalOpen}
-        onClose={() => setFilterModalOpen(false)}
+        isOpen = {filterModalOpen}
+        onClose = {() => setFilterModalOpen(false)}
+        onResults = {(filtered) => setDrivers(filtered)}
       />
 
       <CreateDriverModal
-        isOpen={createModalOpen}
-        onClose={() => setCreateModalOpen(false)}
+        isOpen = {createModalOpen}
+        onClose = {() => setCreateModalOpen(false)}
+        onSuccess = {fetchDrivers}
       />
+
+      {editModal.driver && (
+        <EditDriverModal
+          isOpen = {editModal.isOpen}
+          onClose = {() => setEditModal(prev => ({ ...prev, isOpen: false }))}
+          onSuccess = {fetchDrivers}
+          driver = {editModal.driver}
+        />
+      )}
     </div>
   );
 };
