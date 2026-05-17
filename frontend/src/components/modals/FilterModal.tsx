@@ -91,7 +91,15 @@ export function FilterDriverModal({ isOpen, onClose, onResults }: {
                 filterData = {filterData}
                 onFilterChange = {setFilterData}
             />
-            <div className = "mt-6 flex justify-end">
+            <div className = "mt-6 flex justify-end gap-2">
+                <Button
+                    className = "rounded-lg"
+                    variant = "outline"
+                    type = "button"
+                    onClick = {() => setFilterData(defaultDriverFilterData)}
+                >
+                    Reset
+                </Button>
                 <Button className = "rounded-lg" onClick = {handleFind} disabled = {submitting}>
                     {submitting ? "Searching..." : "Find"}
                 </Button>
@@ -159,7 +167,15 @@ export function FilterVehicleModal({ isOpen, onClose, onResults }: {
     return (
         <BaseModal isOpen = {isOpen} onClose = {onClose} title = "Find a Vehicle" description = "Filter out the details of a vehicle (or more) to find.">
             <VehicleForm mode = "search" filterData = {filterData} onFilterChange = {setFilterData} />
-            <div className = "mt-6 flex justify-end">
+            <div className = "mt-6 flex justify-end gap-2">
+                <Button
+                    className = "rounded-lg"
+                    variant = "outline"
+                    type = "button"
+                    onClick = {() => setFilterData(defaultVehicleFilterData)}
+                >
+                    Reset
+                </Button>
                 <Button className = "rounded-lg" onClick = {handleFind} disabled = {submitting}>
                     {submitting ? "Searching..." : "Find"}
                 </Button>
@@ -217,7 +233,15 @@ export function FilterRegistrationModal({ isOpen, onClose, onResults, allRegistr
     return (
         <BaseModal isOpen = {isOpen} onClose = {onClose} title = "Find a Registration" description = "Filter out the details of a registration (or more) to find.">
             <RegistrationForm mode = "search" filterData = {filterData} onFilterChange = {setFilterData} />
-            <div className = "mt-6 flex justify-end">
+            <div className = "mt-6 flex justify-end gap-2">
+                <Button
+                    className = "rounded-lg"
+                    variant = "outline"
+                    type = "button"
+                    onClick = {() => setFilterData(defaultRegistrationFilterData)}
+                >
+                    Reset
+                </Button>
                 <Button className = "rounded-lg" onClick = {handleFind}>Find</Button>
             </div>
         </BaseModal>
@@ -282,7 +306,15 @@ export function FilterViolationModal({ isOpen, onClose, onResults }: {
     return (
         <BaseModal isOpen = {isOpen} onClose = {onClose} title = "Find a Violation" description = "Filter out the details of a violation (or more) to find.">
             <ViolationForm mode = "search" filterData = {filterData} onFilterChange = {setFilterData} />
-            <div className = "mt-6 flex justify-end">
+            <div className = "mt-6 flex justify-end gap-2">
+                <Button
+                    className = "rounded-lg"
+                    variant = "outline"
+                    type = "button"
+                    onClick = {() => setFilterData(defaultViolationFilterData)}
+                >
+                    Reset
+                </Button>
                 <Button className = "rounded-lg" onClick = {handleFind} disabled = {submitting}>
                     {submitting ? "Searching..." : "Find"}
                 </Button>
