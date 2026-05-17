@@ -3,15 +3,24 @@ import { VehicleRegistration } from "@shared";
 import { RegistrationFilter } from "@shared";
 import { ResultSetHeader, RowDataPacket } from "mysql2/promise";
 
+export const autoExpireRegistrations = async (connection: any) => {
+  await connection.query(
+    `UPDATE vehicle_registrations 
+     SET registration_status = 'Expired' 
+     WHERE expiration_date <= CURDATE() 
+       AND registration_status != 'Expired'`,
+  );
+};
+
 // GET registrations
 export const getAllRegistrations = async () => {
   const connection = await pool.getConnection();
 
   try {
+    await autoExpireRegistrations(connection);
     const [result] = (await connection.query(
       "SELECT * FROM vehicle_registrations",
     )) as any as [VehicleRegistration[], any];
-
     return result as VehicleRegistration[];
   } catch (error) {
     throw error;
@@ -25,6 +34,7 @@ export const getRegistrationID = async (registration_number: number) => {
   const connection = await pool.getConnection();
 
   try {
+    await autoExpireRegistrations(connection);
     const [result] = await connection.query<RowDataPacket[]>(
       "SELECT * FROM vehicle_registrations WHERE registration_number = ?",
       [registration_number],
@@ -47,6 +57,7 @@ export const getRegistrationPlateNo = async (plate_number: string) => {
   const connection = await pool.getConnection();
 
   try {
+    await autoExpireRegistrations(connection);
     const [result] = await connection.query<RowDataPacket[]>(
       "SELECT * FROM vehicle_registrations WHERE plate_number = ?",
       [plate_number],
@@ -65,6 +76,7 @@ export const getExpiredRegistrations = async () => {
   const connection = await pool.getConnection();
 
   try {
+    await autoExpireRegistrations(connection);
     const [result] = await connection.query<RowDataPacket[]>(
       "SELECT * FROM vehicle_registrations WHERE expiration_date <= CURDATE() OR registration_status = 'Expired'",
     );
@@ -84,6 +96,49 @@ export const createRegistration = async (
   const connection = await pool.getConnection();
 
   try {
+    const [vehicle] = await connection.query<RowDataPacket[]>(
+      "SELECT * FROM vehicles WHERE plate_number = ?",
+      [vehicle_registration.plate_number],
+    );
+    if (vehicle.length === 0) {
+      const err = new Error(
+        `Vehicle plate number '${vehicle_registration.plate_number}' does not exist in the database. Please register the vehicle first.`,
+      );
+      (err as any).code = "ER_NO_REFERENCED_ROW_2";
+      throw err;
+    }
+
+    if (vehicle_registration.registration_status === "Active") {
+      const [unpaidViolations] = await connection.query<RowDataPacket[]>(
+        "SELECT COUNT(*) as count FROM traffic_violations WHERE plate_number = ? AND violation_status = 'Unpaid'",
+        [vehicle_registration.plate_number]
+      );
+      if (unpaidViolations && unpaidViolations[0] && (unpaidViolations[0] as any).count > 0) {
+        const err = new Error(
+          `Cannot register vehicle as Active. The vehicle with plate number '${vehicle_registration.plate_number}' has ${(unpaidViolations[0] as any).count} outstanding unpaid traffic violation(s). Please resolve all violations first.`
+        );
+        (err as any).code = "ER_DUP_ENTRY";
+        throw err;
+      }
+    }
+    const [overlappingRegs] = await connection.query<RowDataPacket[]>(
+      `SELECT COUNT(*) as count FROM vehicle_registrations 
+       WHERE plate_number = ? 
+         AND (registration_date <= ? AND expiration_date >= ?)`,
+      [
+        vehicle_registration.plate_number,
+        vehicle_registration.expiration_date,
+        vehicle_registration.registration_date,
+      ],
+    );
+    if (overlappingRegs && overlappingRegs[0] && (overlappingRegs[0] as any).count > 0) {
+      const err = new Error(
+        `Cannot register vehicle. The vehicle with plate number '${vehicle_registration.plate_number}' already has a registration that overlaps with the selected date range (${vehicle_registration.registration_date} to ${vehicle_registration.expiration_date}).`,
+      );
+      (err as any).code = "ER_DUP_ENTRY";
+      throw err;
+    }
+
     const [result] = await connection.query<ResultSetHeader>(
       "INSERT INTO vehicle_registrations (registration_number, registration_status, registration_date, expiration_date, plate_number) VALUES (?, ?, ?, ?, ?)",
       [
@@ -94,6 +149,8 @@ export const createRegistration = async (
         vehicle_registration.plate_number,
       ],
     );
+
+    await autoExpireRegistrations(connection);
 
     const [rows] = await connection.query<RowDataPacket[]>(
       "SELECT * FROM vehicle_registrations WHERE registration_number = ?",
@@ -115,6 +172,68 @@ export const updateRegistration = async (
   const connection = await pool.getConnection();
 
   try {
+    const [existing] = await connection.query<RowDataPacket[]>(
+      "SELECT plate_number FROM vehicle_registrations WHERE registration_number = ?",
+      [vehicle_registration.registration_number]
+    );
+
+    if (existing && existing.length > 0 && existing[0]) {
+      const existingRow = existing[0] as any;
+      if (existingRow.plate_number !== vehicle_registration.plate_number) {
+        const err = new Error(
+          "Security Violation: The vehicle plate number of a registration record is immutable and cannot be transferred to another vehicle."
+        );
+        (err as any).code = "ER_DUP_ENTRY";
+        throw err;
+      }
+    }
+
+    const [vehicle] = await connection.query<RowDataPacket[]>(
+      "SELECT * FROM vehicles WHERE plate_number = ?",
+      [vehicle_registration.plate_number],
+    );
+    if (vehicle.length === 0) {
+      const err = new Error(
+        `Vehicle plate number '${vehicle_registration.plate_number}' does not exist in the database. Please register the vehicle first.`,
+      );
+      (err as any).code = "ER_NO_REFERENCED_ROW_2";
+      throw err;
+    }
+
+    if (vehicle_registration.registration_status === "Active") {
+      const [unpaidViolations] = await connection.query<RowDataPacket[]>(
+        "SELECT COUNT(*) as count FROM traffic_violations WHERE plate_number = ? AND violation_status = 'Unpaid'",
+        [vehicle_registration.plate_number]
+      );
+      if (unpaidViolations && unpaidViolations[0] && (unpaidViolations[0] as any).count > 0) {
+        const err = new Error(
+          `Cannot update registration to Active. The vehicle with plate number '${vehicle_registration.plate_number}' has ${(unpaidViolations[0] as any).count} outstanding unpaid traffic violation(s). Please resolve all violations first.`
+        );
+        (err as any).code = "ER_DUP_ENTRY";
+        throw err;
+      }
+    }
+
+    const [overlappingRegs] = await connection.query<RowDataPacket[]>(
+      `SELECT COUNT(*) as count FROM vehicle_registrations 
+       WHERE plate_number = ? 
+         AND registration_number != ? 
+         AND (registration_date <= ? AND expiration_date >= ?)`,
+      [
+        vehicle_registration.plate_number,
+        vehicle_registration.registration_number,
+        vehicle_registration.expiration_date,
+        vehicle_registration.registration_date,
+      ],
+    );
+    if (overlappingRegs && overlappingRegs[0] && (overlappingRegs[0] as any).count > 0) {
+      const err = new Error(
+        `Cannot update registration. The vehicle with plate number '${vehicle_registration.plate_number}' already has a registration that overlaps with the selected date range (${vehicle_registration.registration_date} to ${vehicle_registration.expiration_date}).`,
+      );
+      (err as any).code = "ER_DUP_ENTRY";
+      throw err;
+    }
+
     const [result] = await connection.query<ResultSetHeader>(
       "UPDATE vehicle_registrations SET registration_status = ?, registration_date = ?, expiration_date = ?, plate_number = ? WHERE registration_number = ?",
       [
@@ -129,6 +248,8 @@ export const updateRegistration = async (
     if (result.affectedRows === 0) {
       return null;
     }
+
+    await autoExpireRegistrations(connection);
 
     const [rows] = await connection.query<RowDataPacket[]>(
       "SELECT * FROM vehicle_registrations WHERE registration_number = ?",
@@ -164,19 +285,3 @@ export const deleteRegistration = async (registration_number: number) => {
     connection.release();
   }
 };
-
-// GENERAL FUNCTION FORMAT
-/*
-export const <function name> = async (<paramters here>) => {
-  const connection = await pool.getConnection();
-  try {
-    const [result] = (await connection.query(<query here>),<parameters here>);
-    return result;
-  } catch (error) {
-    throw error;
-  } finally {
-    connection.release();
-  }
-};
-*/
-

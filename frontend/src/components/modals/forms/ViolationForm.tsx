@@ -62,6 +62,7 @@ export function ViolationForm({ mode, formData, onChange, filterData, onFilterCh
                             required = {!isSearch}
                             value = {isSearch ? filterData!.license_number : formData!.license_number}
                             onChange = {(e) => isSearch ? setFilter("license_number", e.target.value) : set("license_number", e.target.value)}
+                            disabled = {mode === "edit"}
                         />
                     </Field>
                     <FieldDescription className = "text-xs">Enter license no. and include hyphens.</FieldDescription>
@@ -76,6 +77,7 @@ export function ViolationForm({ mode, formData, onChange, filterData, onFilterCh
                             required = {!isSearch}
                             value = {isSearch ? filterData!.plate_number : formData!.plate_number}
                             onChange = {(e) => isSearch ? setFilter("plate_number", e.target.value) : set("plate_number", e.target.value)}
+                            disabled = {mode === "edit"}
                         />
                     </Field>
                     <FieldDescription className = "text-xs">Separate with spaces.</FieldDescription>
@@ -91,6 +93,7 @@ export function ViolationForm({ mode, formData, onChange, filterData, onFilterCh
                             required = {!isSearch}
                             value = {isSearch ? filterData!.violation_type : formData!.violation_type}
                             onChange = {(e) => isSearch ? setFilter("violation_type", e.target.value) : set("violation_type", e.target.value)}
+                            disabled = {mode === "edit"}
                         />
                     </Field>
                 </FieldSet>
@@ -172,6 +175,7 @@ export function ViolationForm({ mode, formData, onChange, filterData, onFilterCh
                             required
                             selected = {formData!.date}
                             onSelect = {(d) => set("date", d)}
+                            disabled = {mode === "edit"}
                         />
                     )}
                 </FieldSet>
@@ -184,6 +188,7 @@ export function ViolationForm({ mode, formData, onChange, filterData, onFilterCh
                             className = "rounded-md text-sm"
                             value = {isSearch ? filterData!.apprehending_officer : formData!.apprehending_officer}
                             onChange = {(e) => isSearch ? setFilter("apprehending_officer", e.target.value) : set("apprehending_officer", e.target.value)}
+                            disabled = {mode === "edit"}
                         />
                     </Field>
                     <FieldDescription className = "text-xs">Separate first, middle, and last name with spaces.</FieldDescription>

@@ -77,11 +77,14 @@ export function RegistrationForm({ mode, formData, onChange, filterData, onFilte
                             placeholder = "ABC 1234"
                             className = "rounded-md text-sm"
                             required = {!isSearch}
+                            readOnly = {mode === "edit"}
                             value = {isSearch ? filterData!.plate_number : formData!.plate_number}
                             onChange = {(e) => isSearch ? setFilter("plate_number", e.target.value) : set("plate_number", e.target.value)}
                         />
                     </Field>
-                    <FieldDescription className = "text-xs">Separate with spaces.</FieldDescription>
+                    <FieldDescription className = "text-xs">
+                        {mode === "edit" ? "Plate number cannot be transferred to another vehicle." : "Separate with spaces."}
+                    </FieldDescription>
                 </FieldSet>
 
                 <FieldSet className = "flex-row justify-between">

@@ -13,9 +13,7 @@ function formatDate(dateString: string): string {
 export const getAllRegistrations = async (req: Request, res: Response) => {
   try {
     const result = await RegistrationService.getAllRegistrations();
-    console.log(result);
-
-    if (!result || result.length === 0) {
+if (!result || result.length === 0) {
       return res
         .status(404)
         .send({
@@ -43,9 +41,7 @@ export const getRegistrationID = async (req: Request, res: Response) => {
 
   try {
     const result = await RegistrationService.getRegistrationID(regNum);
-    console.log(result);
-
-    if (!result) {
+if (!result) {
       return res.status(404).send({
         success: false,
         message: "Vehicle registration not found.",
@@ -71,9 +67,7 @@ export const getRegistrationPlateNo = async (req: Request, res: Response) => {
   try {
     const result =
       await RegistrationService.getRegistrationPlateNo(plate_number);
-    console.log(result);
-
-    if (!result || result.length === 0) {
+if (!result || result.length === 0) {
       return res
         .status(404)
         .send({
@@ -92,9 +86,7 @@ export const getRegistrationPlateNo = async (req: Request, res: Response) => {
 export const getExpiredRegistrations = async (req: Request, res: Response) => {
   try {
     const result = await RegistrationService.getExpiredRegistrations();
-    console.log(result);
-
-    if (!result || result.length === 0) {
+if (!result || result.length === 0) {
       return res
         .status(404)
         .send({
@@ -176,9 +168,7 @@ export const createRegistration = async (req: Request, res: Response) => {
       expiration_date: new Date(newExpDate),
       plate_number,
     } as VehicleRegistration);
-
-    console.log(result);
-    res
+res
       .status(201)
       .send({
         success: true,
@@ -187,10 +177,19 @@ export const createRegistration = async (req: Request, res: Response) => {
       });
   } catch (error: any) {
     if (error.code === "ER_DUP_ENTRY") {
+      const isPrimaryKeyDup = error.message && error.message.includes("PRIMARY");
       return res.status(409).send({
         success: false,
-        message:
-          "A vehicle registration with this registration number already exists.",
+        message: isPrimaryKeyDup
+          ? "A vehicle registration with this registration number already exists."
+          : (error.message || "A duplicate entry error occurred."),
+      });
+    }
+
+    if (error.code === "ER_NO_REFERENCED_ROW_2") {
+      return res.status(409).send({
+        success: false,
+        message: error.message || "The referenced plate number does not exist.",
       });
     }
 
@@ -261,10 +260,7 @@ export const updateRegistration = async (req: Request, res: Response) => {
       plate_number,
       registration_number: regNum,
     } as VehicleRegistration);
-
-    console.log(result);
-
-    if (!result) {
+if (!result) {
       return res
         .status(404)
         .send({ success: false, message: "Vehicle registration not found." });
@@ -277,7 +273,23 @@ export const updateRegistration = async (req: Request, res: Response) => {
         message: "Vehicle registration updated successfully.",
         data: result,
       });
-  } catch (error) {
+  } catch (error: any) {
+    if (error.code === "ER_DUP_ENTRY") {
+      const isPrimaryKeyDup = error.message && error.message.includes("PRIMARY");
+      return res.status(409).send({
+        success: false,
+        message: isPrimaryKeyDup
+          ? "A vehicle registration with this registration number already exists."
+          : (error.message || "A duplicate entry error occurred."),
+      });
+    }
+
+    if (error.code === "ER_NO_REFERENCED_ROW_2") {
+      return res.status(409).send({
+        success: false,
+        message: error.message || "The referenced plate number does not exist.",
+      });
+    }
     res.status(500).send({ success: false, message: "An error occurred." });
   }
 };
@@ -295,9 +307,7 @@ export const deleteRegistration = async (req: Request, res: Response) => {
 
   try {
     const result = await RegistrationService.deleteRegistration(regNum);
-    console.log(result);
-
-    if (result === null) {
+if (result === null) {
       return res.status(404).send({
         success: false,
         message: "Vehicle registration not found.",

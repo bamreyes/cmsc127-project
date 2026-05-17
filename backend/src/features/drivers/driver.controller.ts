@@ -12,9 +12,7 @@ import {
 export const getAllDrivers = async (req: Request, res: Response) => {
   try {
     const result = await DriverService.getAllDrivers();
-    console.log(result);
-
-    res.status(200).send({ success: true, data: result });
+res.status(200).send({ success: true, data: result });
   } catch (error) {
     res.status(500).send({ success: false, message: "An error occured" });
   }
@@ -39,9 +37,7 @@ export const getDriver = async (req: Request, res: Response) => {
 
   try {
     const result = await DriverService.getDriver(license_number as string);
-    console.log(result);
-
-    if (!result) {
+if (!result) {
       return res
         .status(404)
         .send({ success: false, message: "Driver not found" });
@@ -117,9 +113,7 @@ export const createDriver = async (req: Request, res: Response) => {
       issued_at,
       expires_at,
     } as Driver);
-    console.log(result);
-
-    res.status(200).send({
+res.status(200).send({
       success: true,
       message: "Driver created successfully",
       data: result,
@@ -213,9 +207,7 @@ export const updateDriver = async (req: Request, res: Response) => {
       issued_at,
       expires_at,
     } as Driver);
-    console.log(result);
-
-    if (!result) {
+if (!result) {
       return res
         .status(404)
         .send({ success: false, message: "Driver not found" });
@@ -226,7 +218,10 @@ export const updateDriver = async (req: Request, res: Response) => {
       message: "Driver updated successfully",
       data: result,
     });
-  } catch (error) {
+  } catch (error: any) {
+    if (error.code === "ER_ROW_IS_REFERENCED" || error.code === "ER_DUP_ENTRY") {
+      return res.status(409).send({ success: false, message: error.message });
+    }
     res.status(500).send({ success: false, message: "An error occured" });
   }
 };
@@ -250,9 +245,7 @@ export const deleteDriver = async (req: Request, res: Response) => {
 
   try {
     const result = await DriverService.deleteDriver(license_number as string);
-    console.log(result);
-
-    if (!result) {
+if (!result) {
       return res
         .status(404)
         .send({ success: false, message: "Driver not found" });
@@ -263,7 +256,10 @@ export const deleteDriver = async (req: Request, res: Response) => {
       message: "Driver successfully deleted",
       deleted_id: result,
     });
-  } catch (error) {
+  } catch (error: any) {
+    if (error.code === "ER_ROW_IS_REFERENCED") {
+      return res.status(409).send({ success: false, message: error.message });
+    }
     res.status(500).send({ success: false, message: "An error occured" });
   }
 };

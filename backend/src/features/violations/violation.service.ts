@@ -4,6 +4,8 @@ import { ResultSetHeader, RowDataPacket } from "mysql2/promise";
 import { DriverFilter } from "@shared";
 import { VehicleFilter } from "@shared";
 import { ViolationFilter } from "@shared";
+import { autoExpireRegistrations } from "@/features/registrations/registration.service";
+import { syncDriverStatuses } from "@/features/drivers/driver.service";
 
 export const getAllViolations = async () => {
   const connection = await pool.getConnection();
@@ -38,6 +40,28 @@ export const getViolation = async (violation_id: number) => {
 export const createViolation = async (violation: TrafficViolation) => {
   const connection = await pool.getConnection();
   try {
+    // 1. Check if driver exists
+    const [driver] = await connection.query<RowDataPacket[]>(
+      "SELECT * FROM drivers WHERE license_number = ?",
+      [violation.license_number]
+    );
+    if (driver.length === 0) {
+      const err = new Error(`Driver's license number '${violation.license_number}' does not exist in the database. Please register the driver first.`);
+      (err as any).code = "ER_NO_REFERENCED_ROW_2";
+      throw err;
+    }
+
+    // 2. Check if vehicle exists
+    const [vehicle] = await connection.query<RowDataPacket[]>(
+      "SELECT * FROM vehicles WHERE plate_number = ?",
+      [violation.plate_number]
+    );
+    if (vehicle.length === 0) {
+      const err = new Error(`Vehicle plate number '${violation.plate_number}' does not exist in the database. Please register the vehicle first.`);
+      (err as any).code = "ER_NO_REFERENCED_ROW_2";
+      throw err;
+    }
+
     const [insertResult] = await connection.query<ResultSetHeader>(
       "INSERT INTO traffic_violations (date,location,fine_amount,apprehending_officer,violation_status,violation_type,license_number,plate_number) VALUES (?,?,?,?,?,?,?,?)",
       [
@@ -51,6 +75,9 @@ export const createViolation = async (violation: TrafficViolation) => {
         violation.plate_number,
       ],
     );
+
+    await autoExpireRegistrations(connection);
+    await syncDriverStatuses(connection);
 
     const [rows] = await connection.query<RowDataPacket[]>(
       "SELECT * FROM traffic_violations WHERE violation_id = ?",
@@ -68,6 +95,62 @@ export const updateViolation = async (violation: TrafficViolation) => {
   const connection = await pool.getConnection();
 
   try {
+    const [existing] = await connection.query<RowDataPacket[]>(
+      "SELECT license_number, plate_number, violation_type, date, apprehending_officer FROM traffic_violations WHERE violation_id = ?",
+      [violation.violation_id]
+    );
+
+    if (existing && existing.length > 0 && existing[0]) {
+      const existingRow = existing[0] as any;
+      if (existingRow.license_number !== violation.license_number) {
+        const err = new Error("Security Violation: The license number of a traffic violation is immutable and cannot be edited.");
+        (err as any).code = "ER_DUP_ENTRY";
+        throw err;
+      }
+      if (existingRow.plate_number !== violation.plate_number) {
+        const err = new Error("Security Violation: The vehicle plate number of a traffic violation is immutable and cannot be edited.");
+        (err as any).code = "ER_DUP_ENTRY";
+        throw err;
+      }
+      if (existingRow.violation_type !== violation.violation_type) {
+        const err = new Error("Security Violation: The violation type is immutable and cannot be edited.");
+        (err as any).code = "ER_DUP_ENTRY";
+        throw err;
+      }
+      const existingDateStr = new Date(existingRow.date).toISOString().slice(0, 10);
+      const incomingDateStr = new Date(violation.date).toISOString().slice(0, 10);
+      if (existingDateStr !== incomingDateStr) {
+        const err = new Error("Security Violation: The date of apprehension is immutable and cannot be edited.");
+        (err as any).code = "ER_DUP_ENTRY";
+        throw err;
+      }
+      if (existingRow.apprehending_officer !== violation.apprehending_officer) {
+        const err = new Error("Security Violation: The apprehending officer is immutable and cannot be edited.");
+        (err as any).code = "ER_DUP_ENTRY";
+        throw err;
+      }
+    }
+
+    const [driver] = await connection.query<RowDataPacket[]>(
+      "SELECT * FROM drivers WHERE license_number = ?",
+      [violation.license_number]
+    );
+    if (driver.length === 0) {
+      const err = new Error(`Driver's license number '${violation.license_number}' does not exist in the database. Please register the driver first.`);
+      (err as any).code = "ER_NO_REFERENCED_ROW_2";
+      throw err;
+    }
+
+    const [vehicle] = await connection.query<RowDataPacket[]>(
+      "SELECT * FROM vehicles WHERE plate_number = ?",
+      [violation.plate_number]
+    );
+    if (vehicle.length === 0) {
+      const err = new Error(`Vehicle plate number '${violation.plate_number}' does not exist in the database. Please register the vehicle first.`);
+      (err as any).code = "ER_NO_REFERENCED_ROW_2";
+      throw err;
+    }
+
     const [result] = await connection.query<ResultSetHeader>(
       "UPDATE traffic_violations SET date=?, location=?, fine_amount=?, apprehending_officer=?, violation_status=?, violation_type=?, license_number=?, plate_number=? WHERE violation_id=?",
       [
@@ -83,10 +166,12 @@ export const updateViolation = async (violation: TrafficViolation) => {
       ],
     );
 
-    console.log(result);
-    if (result.affectedRows === 0) {
+if (result.affectedRows === 0) {
       return null;
     }
+
+    await autoExpireRegistrations(connection);
+    await syncDriverStatuses(connection);
 
     const [rows] = await connection.query<RowDataPacket[]>(
       "SELECT * FROM traffic_violations WHERE violation_id = ?",
@@ -111,6 +196,9 @@ export const deleteViolation = async (violation_id: number) => {
     if (result.affectedRows == 0) {
       return null;
     }
+
+    await autoExpireRegistrations(connection);
+    await syncDriverStatuses(connection);
 
     return violation_id;
   } catch (error) {

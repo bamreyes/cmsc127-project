@@ -8,7 +8,7 @@ import driverRouter from "@/features/drivers/driver.router";
 import registrationRouter from "@/features/registrations/registration.router";
 import vehicleRouter from "@/features/vehicles/vehicle.router";
 import violationRouter from "@/features/violations/violation.router";
-import { setupTrigger } from "@/features/registrations/registration.trigger";
+import { initializeDatabase } from "./seed";
 
 const app = express();
 app.use(
@@ -35,8 +35,9 @@ app.listen(PORT, async () => {
   try {
     await pool.query("SELECT 1");
     console.log("Database connected");
-    await setupTrigger();
+    const populate = process.env.POPULATE_DB === "true";
+    await initializeDatabase(populate);
   } catch (err) {
-    console.error("Database connection failed:", err);
+    console.error("Database initialization failed:", err);
   }
 });

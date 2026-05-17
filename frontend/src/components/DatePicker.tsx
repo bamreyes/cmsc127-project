@@ -11,19 +11,21 @@ interface DatePickerProps {
     selected?: Date;
     onSelect?: (date: Date | undefined) => void;
     placeholder?: string;
+    disabled?: boolean;
 }
 
-export function DatePicker({ required, selected, onSelect, placeholder = "Select date" }: DatePickerProps) {
+export function DatePicker({ selected, onSelect, placeholder = "Select date", disabled }: DatePickerProps) {
     const [open, setOpen] = React.useState(false)
 
     return (
         <Field className = "w-44">
-            <Popover open = {open} onOpenChange = {setOpen}>
+            <Popover open = {open} onOpenChange = {disabled ? undefined : setOpen}>
                 <PopoverTrigger asChild className = "rounded-md">
                     <Button
                         variant = "outline"
                         id = "date"
                         className = "justify-start font-normal"
+                        disabled = {disabled}
                     >
                         {selected ? selected.toLocaleDateString() : placeholder}
                     </Button>

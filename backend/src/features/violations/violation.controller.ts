@@ -8,9 +8,7 @@ import { VehicleFilter, VehicleType } from "@shared";
 export const getAllViolations = async (req: Request, res: Response) => {
   try {
     const result = await ViolationService.getAllViolations();
-    console.log(result);
-
-    res.status(200).send({ success: true, data: result });
+res.status(200).send({ success: true, data: result });
   } catch (error) {
     res.status(500).send({ success: false, message: "An error occured" });
   }
@@ -34,9 +32,7 @@ export const getViolation = async (req: Request, res: Response) => {
 
   try {
     const result = await ViolationService.getViolation(id);
-    console.log(result);
-
-    if (!result) {
+if (!result) {
       return res.status(404).send({ success: false, message: "Violation not found" });
     }
 
@@ -91,9 +87,7 @@ export const createViolation = async (req: Request, res: Response) => {
       license_number,
       plate_number,
     } as TrafficViolation);
-    console.log(result);
-
-    res
+res
       .status(200)
       .send({ success: true, message: "Violation created successfully", data: result });
   } catch (error: any) {
@@ -102,6 +96,13 @@ export const createViolation = async (req: Request, res: Response) => {
       return res.status(409).send({
         success: false,
         message: "A violation with the same id_number already exists.",
+      });
+    }
+
+    if (error.code === "ER_NO_REFERENCED_ROW_2") {
+      return res.status(409).send({
+        success: false,
+        message: error.message || "The referenced driver's license number or vehicle plate number does not exist.",
       });
     }
 
@@ -126,9 +127,7 @@ export const deleteViolation = async (req: Request, res: Response) => {
 
   try {
     const result = await ViolationService.deleteViolation(id);
-    console.log(result);
-
-    if (!result) {
+if (!result) {
       return res.status(404).send({ success: false, message: "Violation not found" });
     }
 
@@ -200,16 +199,20 @@ export const updateViolation = async (req: Request, res: Response) => {
       license_number,
       plate_number,
     } as TrafficViolation);
-    console.log(result);
-
-    if (!result) {
+if (!result) {
       return res.status(404).send({ success: false, message: "Violation not found" });
     }
 
     res
       .status(200)
       .send({ success: true, message: "Violation updated successfully", data: result });
-  } catch (error) {
+  } catch (error: any) {
+    if (error.code === "ER_NO_REFERENCED_ROW_2") {
+      return res.status(409).send({
+        success: false,
+        message: error.message || "The referenced driver's license number or vehicle plate number does not exist.",
+      });
+    }
     res.status(500).send({ success: false, message: "An error occured" });
   }
 };
@@ -224,6 +227,8 @@ export const filterViolations = async (req: Request, res: Response) => {
     apprehending_officer,
     violation_status,
     violation_type,
+    plate_number,
+    license_number,
   } = req.query;
 
   if (min_date || max_date) {
@@ -255,6 +260,8 @@ export const filterViolations = async (req: Request, res: Response) => {
       apprehending_officer: (apprehending_officer as string) || null,
       violation_status: (violation_status as ViolationStatus) || null,
       violation_type: (violation_type as string) || null,
+      plate_number: (plate_number as string) || null,
+      license_number: (license_number as string) || null,
     } as ViolationFilter);
 
     res.status(200).send({
