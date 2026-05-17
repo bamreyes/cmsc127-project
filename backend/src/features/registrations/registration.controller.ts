@@ -309,4 +309,3 @@ export const deleteRegistration = async (req: Request, res: Response) => {
     res.status(500).send({ success: false, message: "An error occurred." });
   }
 };
-

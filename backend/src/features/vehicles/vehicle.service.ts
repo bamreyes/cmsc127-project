@@ -129,13 +129,30 @@ export const filterVehicleByDriver = async (driverFilter: DriverFilter) => {
     min_expires_at: "d.expires_at >= ?",
     max_expires_at: "d.expires_at <= ?",
     street_building_house: "d.street_building_house LIKE ?",
+    min_year: "v.year >= ?", 
+    max_year: "v.year <= ?"
   };
 
-  Object.entries(driverFilter).forEach(([key, value]) => {
-    if (!value) return;
-    conditions.push(mapping[key] || `d.${key} = ?`);
-    params.push(key === "street_building_house" ? `%${value}%` : value);
-  });
+    const vehicleFields = ["plate_number", "engine_number", "chassis_number",
+                           "vehicle_type", "make", "model", "color", "license_number"];
+    const likeFields = ["make", "model", "color"];
+
+    Object.entries(driverFilter).forEach(([key, value]) => {
+        if (!value) return;
+
+        if (vehicleFields.includes(key)) {
+            if (likeFields.includes(key)) {
+                conditions.push(`v.${key} LIKE ?`);
+                params.push(`%${value}%`);
+            } else {
+                conditions.push(`v.${key} = ?`);
+                params.push(value);
+            }
+        } else {
+            conditions.push(mapping[key] || `d.${key} = ?`);
+            params.push(key === "address" ? `%${value}%` : value);
+        }
+    });
 
   const whereClause =
     conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";

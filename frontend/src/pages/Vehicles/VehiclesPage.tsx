@@ -106,7 +106,7 @@ const VehiclesPage = () => {
             {editModal.vehicle && (
                 <EditVehicleModal
                     isOpen = {editModal.isOpen}
-                    onClose = {() => setEditModal(prev => ({ ...prev, isOpen: false }))}
+                    onClose = {() => setEditModal({ isOpen: false, vehicle: null })}
                     onSuccess = {fetchVehicles}
                     vehicle = {editModal.vehicle}
                 />

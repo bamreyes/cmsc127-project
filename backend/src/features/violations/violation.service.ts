@@ -132,16 +132,19 @@ export const filterViolation = async (violationFilter: ViolationFilter) => {
     max_fine_amount: "fine_amount <= ?",
   };
 
-  Object.entries(violationFilter).forEach(([key, value]) => {
-    if (value === undefined || value === null) return;
-    if (key === "location") {
-      conditions.push(`${key} LIKE ?`);
-      params.push(`%${value}%`);
-    } else {
-      conditions.push(mapping[key] || `${key} = ?`);
-      params.push(value);
-    }
-  });
+    Object.entries(violationFilter).forEach(([key, value]) => {
+        if (value === undefined || value === null) return;
+
+        const likeFields = ["location", "violation_type", "apprehending_officer"];
+
+        if (likeFields.includes(key)) {
+            conditions.push(`${key} LIKE ?`);
+            params.push(`%${value}%`);
+        } else {
+            conditions.push(mapping[key] || `${key} = ?`);
+            params.push(value);
+        }
+    });
 
   const where = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 

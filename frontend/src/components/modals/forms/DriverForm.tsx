@@ -100,11 +100,17 @@ export function DriverForm({ mode, formData, onChange, filterData, onFilterChang
                             placeholder = "N01-12-345678"
                             className = "rounded-md text-sm"
                             required = {!isSearch}
+                            readOnly = {mode === "edit"}
                             value = {isSearch ? filterData!.license_number : formData!.license_number}
                             onChange = {(e) => isSearch ? setFilter("license_number", e.target.value) : set("license_number", e.target.value)}
                         />
                     </Field>
-                    <FieldDescription className = "text-xs">Include hyphens.</FieldDescription>
+
+                    {mode === "edit" ? (
+                        <FieldDescription className = "text-xs text-slate-400">License no. cannot be changed.</FieldDescription>
+                    ) : (
+                        <FieldDescription className = "text-xs">Include hyphens.</FieldDescription>
+                    )}
                 </FieldSet>
 
                 <FieldSet className = "gap-y-2">

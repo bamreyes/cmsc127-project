@@ -130,12 +130,22 @@ export function FilterVehicleModal({ isOpen, onClose, onResults }: {
 
         setSubmitting(true);
         try {
-            const response = await api(`/vehicles/filter/driver?${params.toString()}`);
-            const result = await response.json();
+            const [filterRes, drvRes] = await Promise.all([
+                api(`/vehicles/filter/driver?${params.toString()}`),
+                api("/drivers"),
+            ]);
 
-            if (!response.ok) throw new Error(result.message || "Filter failed.");
+            const result = await filterRes.json();
+            if (!filterRes.ok) throw new Error(result.message || "Filter failed.");
 
-            onResults(result.data || []);
+            const drivers = drvRes.ok ? (await drvRes.json()).data || [] : [];
+
+            const mapped = (result.data || []).map((v: any) => ({
+                ...v,
+                owner_name: drivers.find((d: any) => d.license_number === v.license_number)?.full_name,
+            }));
+
+            onResults(mapped);
             onClose();
         } catch (error) {
             toast.error("Failed to filter vehicles.", {
@@ -185,17 +195,19 @@ export function FilterRegistrationModal({ isOpen, onClose, onResults, allRegistr
             results = results.filter(r => checkedStatuses.includes(r.registration_status));
         }
 
+        const toDay = (d: Date | string) => new Date(new Date(d).toDateString());
+
         if (filterData.registration_date_min) {
-            results = results.filter(r => new Date(r.registration_date) >= filterData.registration_date_min!);
+            results = results.filter(r => toDay(r.registration_date) >= toDay(filterData.registration_date_min!));
         }
         if (filterData.registration_date_max) {
-            results = results.filter(r => new Date(r.registration_date) <= filterData.registration_date_max!);
+            results = results.filter(r => toDay(r.registration_date) <= toDay(filterData.registration_date_max!));
         }
         if (filterData.expiration_date_min) {
-            results = results.filter(r => new Date(r.expiration_date) >= filterData.expiration_date_min!);
+            results = results.filter(r => toDay(r.expiration_date) >= toDay(filterData.expiration_date_min!));
         }
         if (filterData.expiration_date_max) {
-            results = results.filter(r => new Date(r.expiration_date) <= filterData.expiration_date_max!);
+            results = results.filter(r => toDay(r.expiration_date) <= toDay(filterData.expiration_date_max!));
         }
 
         onResults(results);
@@ -241,12 +253,22 @@ export function FilterViolationModal({ isOpen, onClose, onResults }: {
 
         setSubmitting(true);
         try {
-            const response = await api(`/violations/filter?${params.toString()}`);
-            const result = await response.json();
+            const [filterRes, drvRes] = await Promise.all([
+                api(`/violations/filter?${params.toString()}`),
+                api("/drivers"),
+            ]);
 
-            if (!response.ok) throw new Error(result.message || "Filter failed.");
+            const result = await filterRes.json();
+            if (!filterRes.ok) throw new Error(result.message || "Filter failed.");
 
-            onResults(result.data || []);
+            const drivers = drvRes.ok ? (await drvRes.json()).data || [] : [];
+
+            const mapped = (result.data || []).map((v: any) => ({
+                ...v,
+                violator_name: drivers.find((d: any) => d.license_number === v.license_number)?.full_name,
+            }));
+
+            onResults(mapped);
             onClose();
         } catch (error) {
             toast.error("Failed to filter violations.", {

@@ -270,6 +270,15 @@ export const filterByDriver = async (req: Request, res: Response) => {
     license_number,
     min_date,
     max_date,
+    plate_number,
+    engine_number,
+    chassis_number,
+    vehicle_type,
+    make,
+    model,
+    color,
+    min_year,
+    max_year
   } = req.query;
 
   const dateRanges = [
@@ -317,6 +326,15 @@ export const filterByDriver = async (req: Request, res: Response) => {
       max_expires_at: max_expires_at
         ? new Date(max_expires_at as string)
         : null,
+      plate_number: (plate_number as string) || null,
+      engine_number: (engine_number as string) || null,
+      chassis_number: (chassis_number as string) || null,
+      vehicle_type: (vehicle_type as string) || null,
+      make: (make as string) || null,
+      model: (model as string) || null,
+      color: (color as string) || null,
+      min_year: min_year ? Number(min_year) : null,
+      max_year: max_year ? Number(max_year) : null
     };
 
     const vMin = min_date ? new Date(min_date as string) : null;

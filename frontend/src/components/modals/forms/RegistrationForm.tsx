@@ -75,6 +75,7 @@ export function RegistrationForm({ mode, formData, onChange, filterData, onFilte
                             min = {0}
                             step = {1}
                             required = {!isSearch}
+                            readOnly = {mode === "edit"}
                             value = {isSearch ? filterData!.registration_number : formData!.registration_number}
                             onChange = {(e) => {
                                 const val = e.target.value === "" ? "" : Number(e.target.value);
@@ -82,6 +83,10 @@ export function RegistrationForm({ mode, formData, onChange, filterData, onFilte
                             }}
                         />
                     </Field>
+
+                    {mode === "edit" && (
+                        <FieldDescription className = "text-xs text-slate-400">Registration no. cannot be changed.</FieldDescription>
+                    )}
                 </FieldSet>
 
                 <FieldSet className = "gap-y-2">

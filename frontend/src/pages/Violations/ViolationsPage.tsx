@@ -121,7 +121,7 @@ const ViolationsPage = () => {
             {editModal.violation && (
                 <EditViolationModal
                     isOpen = {editModal.isOpen}
-                    onClose = {() => setEditModal(prev => ({ ...prev, isOpen: false }))}
+                    onClose = {() => setEditModal({ isOpen: false, violation: null })}
                     onSuccess = {fetchViolations}
                     violation = {editModal.violation}
                 />

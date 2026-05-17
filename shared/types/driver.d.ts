@@ -27,4 +27,13 @@ export interface DriverFilter {
   max_issued_at?: string | Date | null;
   min_expires_at?: string | Date | null;
   max_expires_at?: string | Date | null;
+  plate_number?: string | null;
+  engine_number?: string | null;
+  chassis_number?: string | null;
+  vehicle_type?: string | null;
+  make?: string | null;
+  model?: string | null;
+  color?: string | null;
+  min_year?: number | null;
+  max_year?: number | null;
 }

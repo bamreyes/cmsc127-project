@@ -156,10 +156,10 @@ const DriversPage = () => {
 
             {editModal.driver && (
                 <EditDriverModal
-                    isOpen={editModal.isOpen}
-                    onClose={() => setEditModal(prev => ({ ...prev, isOpen: false }))}
-                    onSuccess={fetchDrivers}
-                    driver={editModal.driver}
+                    isOpen = {editModal.isOpen}
+                    onClose = {() => setEditModal({ isOpen: false, driver: null })}
+                    onSuccess = {fetchDrivers}
+                    driver = {editModal.driver}
                 />
             )}
         </div>

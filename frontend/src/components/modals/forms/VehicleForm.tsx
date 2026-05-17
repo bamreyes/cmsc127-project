@@ -85,11 +85,17 @@ export function VehicleForm({ mode, formData, onChange, filterData, onFilterChan
                             placeholder = "ABC 1234"
                             className = "rounded-md text-sm"
                             required = {!isSearch}
+                            readOnly = {mode === "edit"}
                             value = {isSearch ? filterData!.plate_number : formData!.plate_number}
                             onChange = {(e) => isSearch ? setFilter("plate_number", e.target.value) : set("plate_number", e.target.value)}
                         />
                     </Field>
-                    <FieldDescription className = "text-xs">Separate with spaces.</FieldDescription>
+
+                    {mode === "edit" ? (
+                        <FieldDescription className = "text-xs text-slate-400">Plate no. cannot be changed.</FieldDescription>
+                    ) : (
+                        <FieldDescription className = "text-xs">Separate with spaces.</FieldDescription>
+                    )}
                 </FieldSet>
 
                 <FieldSet className = "gap-y-2">
