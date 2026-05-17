@@ -28,9 +28,6 @@ const formatDate = (val: any) => {
     day: "2-digit",
   });
 };
-import { EditDriverModal, EditVehicleModal,
-         EditRegistrationModal, EditViolationModal } from "./modals/EditModal";
-import { useState } from "react";
 
 // --- Driver Columns ---
 export const getDriverColumns = (
@@ -106,7 +103,10 @@ export const getDriverColumns = (
 ];
 
 // --- Vehicle Columns ---
-export const getVehicleColumns = (onDelete: (id: string) => void): ColumnDef<Vehicle>[] => [
+export const getVehicleColumns = (
+    onDelete: (id: string) => void,
+    onEdit: (vehicle: Vehicle) => void,
+): ColumnDef<Vehicle>[] => [
   {
     accessorKey: "plate_number",
     header: "Plate No.",
@@ -158,55 +158,38 @@ export const getVehicleColumns = (onDelete: (id: string) => void): ColumnDef<Veh
     accessorKey: "color",
     header: "Color",
   },
-  {
-    id: "actions",
-    header: "Actions",
-    cell: ({ row }) => {
-      const vehicle = row.original;
-      const [editModalOpen, setEditModalOpen] = useState(false);
-
-      return (
-        <>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-
-              <DropdownMenuSeparator />
-
-              <DropdownMenuItem onClick={() => setEditModalOpen(true)}>
-                <Pencil className="mr-2 h-4 w-4" />
-                Edit
-              </DropdownMenuItem>
-
-              <DropdownMenuItem
-                onClick={() => onDelete(vehicle.plate_number)}
-                className="text-red-600 focus:text-red-600"
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        
-          <EditVehicleModal
-            isOpen={editModalOpen}
-            onClose={() => setEditModalOpen(false)}
-          />
-        </>
-      );
-    },
-  },
+    {
+        id: "actions",
+        cell: ({ row }) => {
+            const vehicle = row.original;
+            return (
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant = "ghost" className = "h-8 w-8 p-0">
+                            <MoreHorizontal className = "h-4 w-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align = "end">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick = {() => onEdit(vehicle)}>
+                            <Pencil className = "mr-2 h-4 w-4" />Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick = {() => onDelete(vehicle.plate_number)} className = "text-red-600 focus:text-red-600">
+                            <Trash2 className = "mr-2 h-4 w-4" />Delete
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            );
+        },
+    }
 ];
 
 // --- Violation Columns ---
-export const getViolationColumns = (onDelete: (id: string | number) => void): ColumnDef<TrafficViolation>[] => [
+export const getViolationColumns = (
+    onDelete: (id: string | number) => void,
+    onEdit: (violation: TrafficViolation) => void,
+): ColumnDef<TrafficViolation>[] => [
   {
     accessorKey: "violation_id",
     header: "ID",
@@ -267,55 +250,38 @@ export const getViolationColumns = (onDelete: (id: string | number) => void): Co
     accessorKey: "violation_status",
     header: "Status",
   },
-  {
-    id: "actions",
-    header: "Actions",
-    cell: ({ row }) => {
-      const violation = row.original;
-      const [editModalOpen, setEditModalOpen] = useState(false);
-
-      return (
-        <>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-
-              <DropdownMenuSeparator />
-
-              <DropdownMenuItem onClick={() => setEditModalOpen(true)}>
-                <Pencil className="mr-2 h-4 w-4" />
-                Edit
-              </DropdownMenuItem>
-
-              <DropdownMenuItem
-                onClick={() => onDelete(violation.violation_id)}
-                className="text-red-600 focus:text-red-600"
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          <EditViolationModal
-            isOpen={editModalOpen}
-            onClose={() => setEditModalOpen(false)}
-          />
-        </>
-      );
-    },
-  },
+    {
+        id: "actions",
+        cell: ({ row }) => {
+            const violation = row.original;
+            return (
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant = "ghost" className = "h-8 w-8 p-0">
+                            <MoreHorizontal className = "h-4 w-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align = "end">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick = {() => onEdit(violation)}>
+                            <Pencil className = "mr-2 h-4 w-4" />Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick = {() => onDelete(violation.violation_id)} className = "text-red-600 focus:text-red-600">
+                            <Trash2 className = "mr-2 h-4 w-4" />Delete
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            );
+        },
+    }
 ];
 
 // --- Registration (Transaction) Columns ---
-export const getRegistrationColumns = (onDelete: (id: string | number) => void): ColumnDef<VehicleRegistration>[] => [
+export const getRegistrationColumns = (
+    onDelete: (id: string | number) => void,
+    onEdit: (registration: VehicleRegistration) => void,
+): ColumnDef<VehicleRegistration>[] => [
   {
     accessorKey: "registration_number",
     header: "Reg No.",
@@ -357,48 +323,29 @@ export const getRegistrationColumns = (onDelete: (id: string | number) => void):
     header: "Exp Date",
     cell: ({ getValue }) => formatDate(getValue()),
   },
-  {
-    id: "actions",
-    header: "Actions",
-    cell: ({ row }) => {
-      const reg = row.original;
-      const [editModalOpen, setEditModalOpen] = useState(false);
-
-      return (
-        <>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-
-              <DropdownMenuSeparator />
-
-              <DropdownMenuItem onClick={() => setEditModalOpen(true)}>
-                <Pencil className="mr-2 h-4 w-4" />
-                Edit
-              </DropdownMenuItem>
-
-              <DropdownMenuItem
-                onClick={() => onDelete(reg.registration_number)}
-                className="text-red-600 focus:text-red-600"
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          <EditRegistrationModal
-            isOpen={editModalOpen}
-            onClose={() => setEditModalOpen(false)}
-          />
-        </>
-      );
-    },
-  },
+    {
+        id: "actions",
+            cell: ({ row }) => {
+                const reg = row.original;
+                return (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant = "ghost" className = "h-8 w-8 p-0">
+                                <MoreHorizontal className = "h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align = "end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick = {() => onEdit(reg)}>
+                                <Pencil className = "mr-2 h-4 w-4" />Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick = {() => onDelete(reg.registration_number)} className = "text-red-600 focus:text-red-600">
+                                <Trash2 className = "mr-2 h-4 w-4" />Delete
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                );
+            },
+    }
 ];

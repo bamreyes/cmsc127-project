@@ -2,9 +2,13 @@ import React, { useState } from "react";
 import BaseModal from "@/components/modals/BaseModal";
 import { DriverForm, defaultDriverFilterData } from "@/components/modals/forms/DriverForm";
 import type { DriverFilterData } from "@/components/modals/forms/DriverForm";
-import { VehicleForm } from "./forms/VehicleForm";
-import { RegistrationForm } from "./forms/RegistrationForm";
-import { ViolationForm } from "./forms/ViolationForm";
+import { VehicleForm, defaultVehicleFilterData } from "./forms/VehicleForm";
+import type { VehicleFilterData } from "./forms/VehicleForm";
+import { RegistrationForm, defaultRegistrationFilterData } from "./forms/RegistrationForm";
+import type { RegistrationFilterData } from "./forms/RegistrationForm";
+import { ViolationForm, defaultViolationFilterData } from "./forms/ViolationForm";
+import type { ViolationFilterData } from "./forms/ViolationForm";
+import type { Vehicle, VehicleRegistration, TrafficViolation } from "@shared";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
@@ -24,9 +28,9 @@ export function FilterDriverModal({ isOpen, onClose, onResults }: {
         // Build query params from checked boxes and filled fields.
         const params = new URLSearchParams();
 
-        if (filterData.license_number)  params.set("license_number", filterData.license_number);
+        if (filterData.license_number) params.set("license_number", filterData.license_number);
         if (filterData.full_name)      params.set("full_name", filterData.full_name); 
-        if (filterData.address)         params.set("address", filterData.address);
+        if (filterData.address)        params.set("address", filterData.address);
 
         // Sex: only send if exactly one is checked (backend takes a single value).
         const sexValues = [
@@ -96,77 +100,171 @@ export function FilterDriverModal({ isOpen, onClose, onResults }: {
     );
 }
 
-export function FilterVehicleModal({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
-    const handleSubmit = () => {
-        // To put stuff here soon.
-        console.log("Submitting new driver...");
-        onClose();
+export function FilterVehicleModal({ isOpen, onClose, onResults }: {
+    isOpen: boolean;
+    onClose: () => void;
+    onResults: (vehicles: Vehicle[]) => void;
+}) {
+    const [filterData, setFilterData] = useState<VehicleFilterData>(defaultVehicleFilterData);
+    const [submitting, setSubmitting] = useState(false);
+
+    const handleFind = async () => {
+        const params = new URLSearchParams();
+
+        if (filterData.plate_number)    params.set("plate_number", filterData.plate_number);
+        if (filterData.license_number)  params.set("license_number", filterData.license_number);
+        if (filterData.engine_number)   params.set("engine_number", filterData.engine_number);
+        if (filterData.chassis_number)  params.set("chassis_number", filterData.chassis_number);
+        if (filterData.make)            params.set("make", filterData.make);
+        if (filterData.model)           params.set("model", filterData.model);
+        if (filterData.color)           params.set("color", filterData.color);
+        if (filterData.min_year !== "") params.set("min_year", String(filterData.min_year));
+        if (filterData.max_year !== "") params.set("max_year", String(filterData.max_year));
+
+        const typeValues = [
+            filterData.vehicle_type_private && "Private Car",
+            filterData.vehicle_type_puv     && "Public Utility Vehicle",
+            filterData.vehicle_type_motor   && "Motorcycle",
+        ].filter(Boolean) as string[];
+        if (typeValues.length === 1) params.set("vehicle_type", typeValues[0]);
+
+        setSubmitting(true);
+        try {
+            const response = await api(`/vehicles/filter/driver?${params.toString()}`);
+            const result = await response.json();
+
+            if (!response.ok) throw new Error(result.message || "Filter failed.");
+
+            onResults(result.data || []);
+            onClose();
+        } catch (error) {
+            toast.error("Failed to filter vehicles.", {
+                description: error instanceof Error ? error.message : "An unexpected error occurred.",
+            });
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     return (
-        <BaseModal
-            isOpen = {isOpen}
-            onClose = {onClose}
-            title = "Find a Vehicle"
-            description = "Filter out the details of a vehicle (or more) to find."
-        >
-            <VehicleForm mode = "search" />
-
+        <BaseModal isOpen = {isOpen} onClose = {onClose} title = "Find a Vehicle" description = "Filter out the details of a vehicle (or more) to find.">
+            <VehicleForm mode = "search" filterData = {filterData} onFilterChange = {setFilterData} />
             <div className = "mt-6 flex justify-end">
-                <Button className = "rounded-lg" onClick = {handleSubmit}>
-                    Find
+                <Button className = "rounded-lg" onClick = {handleFind} disabled = {submitting}>
+                    {submitting ? "Searching..." : "Find"}
                 </Button>
             </div>
         </BaseModal>
-    )
+    );
 }
 
-export function FilterRegistrationModal({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
-    const handleSubmit = () => {
-        // To put stuff here soon.
-        console.log("Submitting new driver...");
+export function FilterRegistrationModal({ isOpen, onClose, onResults, allRegistrations }: {
+    isOpen: boolean;
+    onClose: () => void;
+    onResults: (registrations: VehicleRegistration[]) => void;
+    allRegistrations: VehicleRegistration[];
+}) {
+    const [filterData, setFilterData] = useState<RegistrationFilterData>(defaultRegistrationFilterData);
+
+    const handleFind = () => {
+        let results = [...allRegistrations];
+
+        if (filterData.registration_number !== "") {
+            results = results.filter(r => r.registration_number === filterData.registration_number);
+        }
+        if (filterData.plate_number) {
+            results = results.filter(r => r.plate_number.toLowerCase().includes(filterData.plate_number.toLowerCase()));
+        }
+
+        const checkedStatuses = [
+            filterData.registration_status_active     && "Active",
+            filterData.registration_status_expired    && "Expired",
+            filterData.registration_status_suspended  && "Suspended",
+        ].filter(Boolean) as string[];
+        if (checkedStatuses.length > 0) {
+            results = results.filter(r => checkedStatuses.includes(r.registration_status));
+        }
+
+        if (filterData.registration_date_min) {
+            results = results.filter(r => new Date(r.registration_date) >= filterData.registration_date_min!);
+        }
+        if (filterData.registration_date_max) {
+            results = results.filter(r => new Date(r.registration_date) <= filterData.registration_date_max!);
+        }
+        if (filterData.expiration_date_min) {
+            results = results.filter(r => new Date(r.expiration_date) >= filterData.expiration_date_min!);
+        }
+        if (filterData.expiration_date_max) {
+            results = results.filter(r => new Date(r.expiration_date) <= filterData.expiration_date_max!);
+        }
+
+        onResults(results);
         onClose();
     };
 
     return (
-        <BaseModal
-            isOpen = {isOpen}
-            onClose = {onClose}
-            title = "Find a Registration"
-            description = "Filter out the details of a registration (or more) to find."
-        >
-            <RegistrationForm mode = "search" />
-
+        <BaseModal isOpen = {isOpen} onClose = {onClose} title = "Find a Registration" description = "Filter out the details of a registration (or more) to find.">
+            <RegistrationForm mode = "search" filterData = {filterData} onFilterChange = {setFilterData} />
             <div className = "mt-6 flex justify-end">
-                <Button className = "rounded-lg" onClick = {handleSubmit}>
-                    Find
-                </Button>
+                <Button className = "rounded-lg" onClick = {handleFind}>Find</Button>
             </div>
         </BaseModal>
-    )
+    );
 }
 
-export function FilterViolationModal({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
-    const handleSubmit = () => {
-        // To put stuff here soon.
-        console.log("Submitting new driver...");
-        onClose();
+export function FilterViolationModal({ isOpen, onClose, onResults }: {
+    isOpen: boolean;
+    onClose: () => void;
+    onResults: (violations: TrafficViolation[]) => void;
+}) {
+    const [filterData, setFilterData] = useState<ViolationFilterData>(defaultViolationFilterData);
+    const [submitting, setSubmitting] = useState(false);
+
+    const handleFind = async () => {
+        const toDateString = (d: Date) => d.toISOString().split("T")[0];
+        const params = new URLSearchParams();
+
+        if (filterData.location)               params.set("location", filterData.location);
+        if (filterData.violation_type)         params.set("violation_type", filterData.violation_type);
+        if (filterData.apprehending_officer)   params.set("apprehending_officer", filterData.apprehending_officer);
+        if (filterData.min_fine_amount !== "") params.set("min_fine_amount", String(filterData.min_fine_amount));
+        if (filterData.max_fine_amount !== "") params.set("max_fine_amount", String(filterData.max_fine_amount));
+        if (filterData.date_min)               params.set("min_date", toDateString(filterData.date_min));
+        if (filterData.date_max)               params.set("max_date", toDateString(filterData.date_max));
+
+        const statusValues = [
+            filterData.violation_status_unpaid     && "Unpaid",
+            filterData.violation_status_paid       && "Paid",
+            filterData.violation_status_contested  && "Contested",
+        ].filter(Boolean) as string[];
+        if (statusValues.length === 1) params.set("violation_status", statusValues[0]);
+
+        setSubmitting(true);
+        try {
+            const response = await api(`/violations/filter?${params.toString()}`);
+            const result = await response.json();
+
+            if (!response.ok) throw new Error(result.message || "Filter failed.");
+
+            onResults(result.data || []);
+            onClose();
+        } catch (error) {
+            toast.error("Failed to filter violations.", {
+                description: error instanceof Error ? error.message : "An unexpected error occurred.",
+            });
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     return (
-        <BaseModal
-            isOpen = {isOpen}
-            onClose = {onClose}
-            title = "Find a Violation"
-            description = "Filter out the details of a violation (or more) to find."
-        >
-            <ViolationForm mode = "search" />
-
+        <BaseModal isOpen = {isOpen} onClose = {onClose} title = "Find a Violation" description = "Filter out the details of a violation (or more) to find.">
+            <ViolationForm mode = "search" filterData = {filterData} onFilterChange = {setFilterData} />
             <div className = "mt-6 flex justify-end">
-                <Button className = "rounded-lg" onClick = {handleSubmit}>
-                    Find
+                <Button className = "rounded-lg" onClick = {handleFind} disabled = {submitting}>
+                    {submitting ? "Searching..." : "Find"}
                 </Button>
             </div>
         </BaseModal>
-    )
+    );
 }
