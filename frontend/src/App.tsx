@@ -24,7 +24,7 @@ function App() {
             <Route path="/reports" element={<ReportsPage />} />
           </Routes>
         </main>
-        <Toaster richColors position="top-right" />
+        <Toaster richColors position="top-right" closeButton />
       </div>
     </BrowserRouter>
   );

@@ -277,6 +277,8 @@ export function FilterViolationModal({ isOpen, onClose, onResults }: {
         if (filterData.max_fine_amount !== "") params.set("max_fine_amount", String(filterData.max_fine_amount));
         if (filterData.date_min)               params.set("min_date", toDateString(filterData.date_min));
         if (filterData.date_max)               params.set("max_date", toDateString(filterData.date_max));
+        if (filterData.plate_number)           params.set("plate_number", filterData.plate_number);
+        if (filterData.license_number)         params.set("license_number", filterData.license_number);
 
         const statusValues = [
             filterData.violation_status_unpaid     && "Unpaid",
