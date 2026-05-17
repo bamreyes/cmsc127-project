@@ -123,6 +123,8 @@ export const filterDriver = async ({
   min_bdate,
   max_bdate,
   address,
+  license_number,
+  full_name
 }: DriverFilter) => {
   const connection = await pool.getConnection();
   try {
@@ -153,6 +155,15 @@ export const filterDriver = async ({
       conditions.push("address LIKE ?");
       params.push(`%${address}%`);
     }
+    if (license_number) {
+        conditions.push("license_number LIKE ?");
+        params.push(`%${license_number}%`);
+    }
+    if (full_name) {
+        conditions.push("full_name LIKE ?");
+        params.push(`%${full_name}%`);
+    }
+
     const where =
       conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 

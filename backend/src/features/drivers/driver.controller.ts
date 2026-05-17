@@ -270,8 +270,8 @@ export const deleteDriver = async (req: Request, res: Response) => {
 
 // GET /api/drivers/filter/
 export const filterDrivers = async (req: Request, res: Response) => {
-  const { license_type, license_status, min_bdate, max_bdate, sex, address } =
-    req.query;
+  const { license_type, license_status, min_bdate, max_bdate, sex, address,
+          license_number, full_name } = req.query;
 
   if (min_bdate || max_bdate) {
     const min = new Date(min_bdate as string);
@@ -300,7 +300,9 @@ export const filterDrivers = async (req: Request, res: Response) => {
       min_bdate: min_bdate ? new Date(min_bdate as string) : null,
       max_bdate: max_bdate ? new Date(max_bdate as string) : null,
       address: (address as string) ?? null,
-    } as DriverFilter);
+      license_number: (license_number as string) ?? null, 
+      full_name: (full_name as string) ?? null
+    });
 
     res.status(200).send({
       success: true,
