@@ -28,7 +28,12 @@ export function CreateDriverModal({ isOpen, onClose, onSuccess }: {
             return;
         }
 
-        const toDateString = (d: Date) => d.toISOString().split("T")[0];
+        const toDateString = (d: Date) => {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, "0");
+            const r = String(d.getDate()).padStart(2, "0");
+            return `${y}-${m}-${r}`;
+        };
 
         setSubmitting(true);
         try {
@@ -38,7 +43,7 @@ export function CreateDriverModal({ isOpen, onClose, onSuccess }: {
                     license_number: formData.license_number,
                     full_name: formData.full_name,
                     date_of_birth: toDateString(formData.date_of_birth),
-                    sex: formData.sex,
+                    sex: formData.sex === "M" ? "Male" : formData.sex === "F" ? "Female" : formData.sex,
                     address: formData.address,
                     license_type: formData.license_type,
                     license_status: formData.license_status,
@@ -173,7 +178,12 @@ export function CreateRegistrationModal({ isOpen, onClose, onSuccess }: {
             return;
         }
 
-        const toDateString = (d: Date) => d.toISOString().split("T")[0];
+        const toDateString = (d: Date) => {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, "0");
+            const r = String(d.getDate()).padStart(2, "0");
+            return `${y}-${m}-${r}`;
+        };
 
         setSubmitting(true);
         try {
@@ -239,7 +249,12 @@ export function CreateViolationModal({ isOpen, onClose, onSuccess }: {
             return;
         }
 
-        const toDateString = (d: Date) => d.toISOString().split("T")[0];
+        const toDateString = (d: Date) => {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, "0");
+            const r = String(d.getDate()).padStart(2, "0");
+            return `${y}-${m}-${r}`;
+        };
 
         setSubmitting(true);
         try {

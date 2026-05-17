@@ -23,11 +23,17 @@ export function EditDriverModal({ isOpen, onClose, onSuccess, driver }: {
     const toDate = (val: string | Date | undefined) =>
         val ? new Date(val) : undefined;
 
+    const mapSexToCode = (s: string): "M" | "F" => {
+        if (s === "Male") return "M";
+        if (s === "Female") return "F";
+        return s as "M" | "F";
+    };
+
     const [formData, setFormData] = useState<DriverFormData>({
         license_number: driver.license_number,
         full_name: driver.full_name,
         date_of_birth: toDate(driver.date_of_birth),
-        sex: driver.sex,
+        sex: mapSexToCode(driver.sex),
         address: driver.address,
         license_type: driver.license_type,
         license_status: driver.license_status,
@@ -41,7 +47,7 @@ export function EditDriverModal({ isOpen, onClose, onSuccess, driver }: {
             license_number: driver.license_number,
             full_name: driver.full_name,
             date_of_birth: toDate(driver.date_of_birth),
-            sex: driver.sex,
+            sex: mapSexToCode(driver.sex),
             address: driver.address,
             license_type: driver.license_type,
             license_status: driver.license_status,
@@ -60,7 +66,12 @@ export function EditDriverModal({ isOpen, onClose, onSuccess, driver }: {
             return;
         }
 
-        const toDateString = (d: Date) => d.toISOString().split("T")[0];
+        const toDateString = (d: Date) => {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, "0");
+            const r = String(d.getDate()).padStart(2, "0");
+            return `${y}-${m}-${r}`;
+        };
 
         setSubmitting(true);
         try {
@@ -70,7 +81,7 @@ export function EditDriverModal({ isOpen, onClose, onSuccess, driver }: {
                     license_number: formData.license_number,
                     full_name: formData.full_name,
                     date_of_birth: toDateString(formData.date_of_birth),
-                    sex: formData.sex,
+                    sex: formData.sex === "M" ? "Male" : formData.sex === "F" ? "Female" : formData.sex,
                     address: formData.address,
                     license_type: formData.license_type,
                     license_status: formData.license_status,
@@ -241,7 +252,12 @@ export function EditRegistrationModal({ isOpen, onClose, onSuccess, registration
             return;
         }
 
-        const toDateString = (d: Date) => d.toISOString().split("T")[0];
+        const toDateString = (d: Date) => {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, "0");
+            const r = String(d.getDate()).padStart(2, "0");
+            return `${y}-${m}-${r}`;
+        };
 
         setSubmitting(true);
         try {
@@ -330,7 +346,12 @@ export function EditViolationModal({ isOpen, onClose, onSuccess, violation }: {
             return;
         }
 
-        const toDateString = (d: Date) => d.toISOString().split("T")[0];
+        const toDateString = (d: Date) => {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, "0");
+            const r = String(d.getDate()).padStart(2, "0");
+            return `${y}-${m}-${r}`;
+        };
 
         setSubmitting(true);
         try {

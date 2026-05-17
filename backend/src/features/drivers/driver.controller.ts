@@ -165,7 +165,6 @@ export const updateDriver = async (req: Request, res: Response) => {
   } = req.body;
 
   const requiredFields = [
-    "license_number",
     "full_name",
     "date_of_birth",
     "sex",
@@ -186,7 +185,8 @@ export const updateDriver = async (req: Request, res: Response) => {
 
   if (
     isNaN(new Date(issued_at).getTime()) ||
-    isNaN(new Date(expires_at).getTime())
+    isNaN(new Date(expires_at).getTime()) ||
+    isNaN(new Date(date_of_birth).getTime())
   ) {
     return res.status(400).send({
       success: false,
@@ -274,17 +274,17 @@ export const filterDrivers = async (req: Request, res: Response) => {
           license_number, full_name } = req.query;
 
   if (min_bdate || max_bdate) {
-    const min = new Date(min_bdate as string);
-    const max = new Date(max_bdate as string);
+    const minD = min_bdate ? new Date(min_bdate as string) : null;
+    const maxD = max_bdate ? new Date(max_bdate as string) : null;
 
-    if (isNaN(min.getTime()) || isNaN(max.getTime())) {
+    if ((min_bdate && isNaN(minD!.getTime())) || (max_bdate && isNaN(maxD!.getTime()))) {
       return res.status(400).send({
         success: false,
         message: "Dates must be in a valid format (YYYY-MM-DD)",
       });
     }
 
-    if (min > max) {
+    if (minD && maxD && minD > maxD) {
       return res.status(400).send({
         success: false,
         message: "Minimum date cannot be after maximum date",

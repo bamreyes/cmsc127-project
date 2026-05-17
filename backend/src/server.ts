@@ -8,6 +8,7 @@ import driverRouter from "@/features/drivers/driver.router";
 import registrationRouter from "@/features/registrations/registration.router";
 import vehicleRouter from "@/features/vehicles/vehicle.router";
 import violationRouter from "@/features/violations/violation.router";
+import { setupTrigger } from "@/features/registrations/registration.trigger";
 
 const app = express();
 app.use(
@@ -34,6 +35,7 @@ app.listen(PORT, async () => {
   try {
     await pool.query("SELECT 1");
     console.log("Database connected");
+    await setupTrigger();
   } catch (err) {
     console.error("Database connection failed:", err);
   }

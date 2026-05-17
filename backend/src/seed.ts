@@ -31,18 +31,6 @@ async function seed() {
     `);
 
     await pool.query(`
-      CREATE TABLE vehicle_registrations (
-        registration_number bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-        registration_status varchar(20) DEFAULT NULL,
-        registration_date date DEFAULT NULL,
-        expiration_date date DEFAULT NULL,
-        plate_number varchar(20) NOT NULL,
-        PRIMARY KEY (registration_number),
-        UNIQUE KEY plate_number (plate_number)
-      )
-    `);
-
-    await pool.query(`
       CREATE TABLE vehicles (
         plate_number varchar(20) NOT NULL,
         engine_number varchar(50) NOT NULL,
@@ -57,8 +45,20 @@ async function seed() {
         UNIQUE KEY engine_number (engine_number),
         UNIQUE KEY chassis_number (chassis_number),
         KEY fk_vehicles_drivers (license_number),
-        CONSTRAINT fk_vehicle_reg FOREIGN KEY (plate_number) REFERENCES vehicle_registrations (plate_number) ON DELETE CASCADE,
         CONSTRAINT fk_vehicles_drivers FOREIGN KEY (license_number) REFERENCES drivers (license_number) ON DELETE SET NULL ON UPDATE CASCADE
+      )
+    `);
+
+    await pool.query(`
+      CREATE TABLE vehicle_registrations (
+        registration_number bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+        registration_status varchar(20) DEFAULT NULL,
+        registration_date date DEFAULT NULL,
+        expiration_date date DEFAULT NULL,
+        plate_number varchar(20) NOT NULL,
+        PRIMARY KEY (registration_number),
+        UNIQUE KEY plate_number (plate_number),
+        CONSTRAINT fk_reg_vehicles FOREIGN KEY (plate_number) REFERENCES vehicles (plate_number) ON DELETE CASCADE ON UPDATE CASCADE
       )
     `);
 
@@ -101,24 +101,7 @@ async function seed() {
       );
     }
 
-    // Insert Vehicle Registrations First (due to FK constraint on vehicles)
-    console.log("Seeding vehicle registrations...");
-    const registrations = [
-      ['Active', '2023-01-10', '2024-01-10', 'ABC-1234'],
-      ['Active', '2023-05-15', '2024-05-15', 'XYZ-9876'],
-      ['Expired', '2022-08-20', '2023-08-20', 'DEF-4567'],
-      ['Active', '2023-11-05', '2024-11-05', 'LMN-3456'],
-      ['Active', '2023-02-28', '2024-02-28', 'PQR-7890'],
-    ];
-
-    for (const r of registrations) {
-      await pool.query(
-        "INSERT INTO vehicle_registrations (registration_status, registration_date, expiration_date, plate_number) VALUES (?, ?, ?, ?)",
-        r
-      );
-    }
-
-    // Insert Vehicles
+    // Insert Vehicles First (due to FK constraint on vehicle registrations)
     console.log("Seeding vehicles...");
     const vehicles = [
       ['ABC-1234', 'ENG-1001', 'CHAS-2001', 'SUV', 'Toyota', 'Fortuner', 2020, 'Black', 'LTO-TX-001'],
@@ -132,6 +115,23 @@ async function seed() {
       await pool.query(
         "INSERT INTO vehicles (plate_number, engine_number, chassis_number, vehicle_type, make, model, year, color, license_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
         v
+      );
+    }
+
+    // Insert Vehicle Registrations
+    console.log("Seeding vehicle registrations...");
+    const registrations = [
+      ['Active', '2023-01-10', '2024-01-10', 'ABC-1234'],
+      ['Active', '2023-05-15', '2024-05-15', 'XYZ-9876'],
+      ['Expired', '2022-08-20', '2023-08-20', 'DEF-4567'],
+      ['Active', '2023-11-05', '2024-11-05', 'LMN-3456'],
+      ['Active', '2023-02-28', '2024-02-28', 'PQR-7890'],
+    ];
+
+    for (const r of registrations) {
+      await pool.query(
+        "INSERT INTO vehicle_registrations (registration_status, registration_date, expiration_date, plate_number) VALUES (?, ?, ?, ?)",
+        r
       );
     }
 

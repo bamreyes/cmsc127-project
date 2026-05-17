@@ -36,7 +36,7 @@ export const createVehicle = async (vehicle: Vehicle) => {
   const connection = await pool.getConnection();
   try {
     const [result] = await connection.query<ResultSetHeader>(
-      "INSERT INTO vehicles VALUES (?,?,?,?,?,?,?,?,?)",
+      "INSERT INTO vehicles (plate_number, engine_number, chassis_number, vehicle_type, make, model, year, color, license_number) VALUES (?,?,?,?,?,?,?,?,?)",
       [
         vehicle.plate_number,
         vehicle.engine_number,
@@ -128,31 +128,39 @@ export const filterVehicleByDriver = async (driverFilter: DriverFilter) => {
     max_issued_at: "d.issued_at <= ?",
     min_expires_at: "d.expires_at >= ?",
     max_expires_at: "d.expires_at <= ?",
-    street_building_house: "d.street_building_house LIKE ?",
-    min_year: "v.year >= ?", 
-    max_year: "v.year <= ?"
+    address: "d.address LIKE ?",
+    min_year: "v.year >= ?",
+    max_year: "v.year <= ?",
   };
 
-    const vehicleFields = ["plate_number", "engine_number", "chassis_number",
-                           "vehicle_type", "make", "model", "color", "license_number"];
-    const likeFields = ["make", "model", "color"];
+  const vehicleFields = [
+    "plate_number",
+    "engine_number",
+    "chassis_number",
+    "vehicle_type",
+    "make",
+    "model",
+    "color",
+    "license_number",
+  ];
+  const likeFields = ["make", "model", "color"];
 
-    Object.entries(driverFilter).forEach(([key, value]) => {
-        if (!value) return;
+  Object.entries(driverFilter).forEach(([key, value]) => {
+    if (!value) return;
 
-        if (vehicleFields.includes(key)) {
-            if (likeFields.includes(key)) {
-                conditions.push(`v.${key} LIKE ?`);
-                params.push(`%${value}%`);
-            } else {
-                conditions.push(`v.${key} = ?`);
-                params.push(value);
-            }
-        } else {
-            conditions.push(mapping[key] || `d.${key} = ?`);
-            params.push(key === "address" ? `%${value}%` : value);
-        }
-    });
+    if (vehicleFields.includes(key)) {
+      if (likeFields.includes(key)) {
+        conditions.push(`v.${key} LIKE ?`);
+        params.push(`%${value}%`);
+      } else {
+        conditions.push(`v.${key} = ?`);
+        params.push(value);
+      }
+    } else {
+      conditions.push(mapping[key] || `d.${key} = ?`);
+      params.push(key === "address" ? `%${value}%` : value);
+    }
+  });
 
   const whereClause =
     conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
@@ -170,4 +178,3 @@ export const filterVehicleByDriver = async (driverFilter: DriverFilter) => {
     connection.release();
   }
 };
-

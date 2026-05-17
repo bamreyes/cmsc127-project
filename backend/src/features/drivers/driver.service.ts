@@ -36,7 +36,7 @@ export const createDriver = async (driver: Driver) => {
   const connection = await pool.getConnection();
   try {
     const [result] = await connection.query<ResultSetHeader>(
-      "INSERT INTO drivers VALUES (?,?,?,?,?,?,?,?,?)",
+      "INSERT INTO drivers (license_number, full_name, date_of_birth, sex, address, license_type, license_status, issued_at, expires_at) VALUES (?,?,?,?,?,?,?,?,?)",
       [
         driver.license_number,
         driver.full_name,

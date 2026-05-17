@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import BaseModal from "@/components/modals/BaseModal";
 import { DriverForm, defaultDriverFilterData } from "@/components/modals/forms/DriverForm";
 import type { DriverFilterData } from "@/components/modals/forms/DriverForm";
@@ -23,7 +23,12 @@ export function FilterDriverModal({ isOpen, onClose, onResults }: {
     const [submitting, setSubmitting] = useState(false);
 
     const handleFind = async () => {
-        const toDateString = (d: Date) => d.toISOString().split("T")[0];
+        const toDateString = (d: Date) => {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, "0");
+            const r = String(d.getDate()).padStart(2, "0");
+            return `${y}-${m}-${r}`;
+        };
 
         // Build query params from checked boxes and filled fields.
         const params = new URLSearchParams();
@@ -37,7 +42,7 @@ export function FilterDriverModal({ isOpen, onClose, onResults }: {
             filterData.sex_m && "M",
             filterData.sex_f && "F",
         ].filter(Boolean) as string[];
-        if (sexValues.length === 1) params.set("sex", sexValues[0]);
+        if (sexValues.length === 1) params.set("sex", sexValues[0] === "M" ? "Male" : "Female");
 
         // License type: send first checked (or none if multiple/none).
         const typeValues = [
@@ -257,7 +262,12 @@ export function FilterViolationModal({ isOpen, onClose, onResults }: {
     const [submitting, setSubmitting] = useState(false);
 
     const handleFind = async () => {
-        const toDateString = (d: Date) => d.toISOString().split("T")[0];
+        const toDateString = (d: Date) => {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, "0");
+            const r = String(d.getDate()).padStart(2, "0");
+            return `${y}-${m}-${r}`;
+        };
         const params = new URLSearchParams();
 
         if (filterData.location)               params.set("location", filterData.location);

@@ -175,12 +175,13 @@ export const filterViolationByDriver = async (
     min_expires_at: "d.expires_at >= ?",
     max_expires_at: "d.expires_at <= ?",
     address: "d.address LIKE ?",
+    full_name: "d.full_name LIKE ?",
   };
 
   Object.entries(driverFilter).forEach(([key, value]) => {
     if (!value) return;
     conditions.push(mapping[key] || `d.${key} = ?`);
-    params.push(key === "address" ? `%${value}%` : value);
+    params.push(key === "address" || key === "full_name" ? `%${value}%` : value);
   });
 
   if (min_date) {
@@ -224,12 +225,17 @@ export const filterViolationByVehicle = async (
   const mapping: Record<string, string> = {
     min_year: "v.year >= ?",
     max_year: "v.year <= ?",
+    make: "v.make LIKE ?",
+    model: "v.model LIKE ?",
+    color: "v.color LIKE ?",
   };
+
+  const likeFields = ["make", "model", "color"];
 
   Object.entries(vehicleFilter).forEach(([key, value]) => {
     if (!value) return;
     conditions.push(mapping[key] || `v.${key} = ?`);
-    params.push(value);
+    params.push(likeFields.includes(key) ? `%${value}%` : value);
   });
 
   if (min_date) {

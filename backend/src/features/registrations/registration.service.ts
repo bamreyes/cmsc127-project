@@ -66,7 +66,7 @@ export const getExpiredRegistrations = async () => {
 
   try {
     const [result] = await connection.query<RowDataPacket[]>(
-      "SELECT * FROM vehicle_registrations WHERE expiration_date <= CURDATE() AND registration_status = 'Expired'",
+      "SELECT * FROM vehicle_registrations WHERE expiration_date <= CURDATE() OR registration_status = 'Expired'",
     );
 
     return result as VehicleRegistration[];

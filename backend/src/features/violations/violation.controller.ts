@@ -406,6 +406,9 @@ export const filterByVehicle = async (req: Request, res: Response) => {
         min_year: min_year ? Number(min_year) : null,
         color: (color as string) || null,
       } as VehicleFilter,
+      vMin,
+      vMax,
+      (location as string) || null,
     );
 
     res.status(200).send({
