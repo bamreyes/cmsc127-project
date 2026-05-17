@@ -5,42 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox.tsx";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group.tsx";
 import { DatePicker } from "@/components/DatePicker";
-import type { LicenseStatus, LicenseType, Sex } from "@shared";
-
-// Data shape for create/edit mode.
-export interface DriverFormData {
-    license_number: string;
-    full_name: string;
-    date_of_birth: Date | undefined;
-    sex: Sex;
-    address: string;
-    license_type: LicenseType;
-    license_status: LicenseStatus;
-    issued_at: Date | undefined;
-    expires_at: Date | undefined;
-}
-
-// Data shape for search/filter mode (all optional).
-export interface DriverFilterData {
-    license_number: string;
-    full_name: string;
-    date_of_birth_min: Date | undefined;
-    date_of_birth_max: Date | undefined;
-    sex_m: boolean;
-    sex_f: boolean;
-    address: string;
-    license_type_nonpro: boolean;
-    license_type_pro: boolean;
-    license_type_student: boolean;
-    license_status_valid: boolean;
-    license_status_expired: boolean;
-    license_status_suspended: boolean;
-    license_status_revoked: boolean;
-    issued_at_min: Date | undefined;
-    issued_at_max: Date | undefined;
-    expires_at_min: Date | undefined;
-    expires_at_max: Date | undefined;
-}
+import type { LicenseStatus, LicenseType, Sex, DriverFormData, DriverFilterData } from "@shared";
+export type { DriverFormData, DriverFilterData };
 
 export const defaultDriverFormData: DriverFormData = {
     license_number: "",
@@ -93,26 +59,7 @@ export function DriverForm({ mode, formData, onChange, filterData, onFilterChang
     return (
         <>
             <FieldGroup className = "gap-y-6">
-                <FieldSet className = "gap-y-2">
-                    <FieldLabel>{isSearch ? "License No." : "License No. *"}</FieldLabel>
-                    <Field>
-                        <Input
-                            placeholder = "N01-12-345678"
-                            className = "rounded-md text-sm"
-                            required = {!isSearch}
-                            readOnly = {mode === "edit"}
-                            value = {isSearch ? filterData!.license_number : formData!.license_number}
-                            onChange = {(e) => isSearch ? setFilter("license_number", e.target.value) : set("license_number", e.target.value)}
-                        />
-                    </Field>
-
-                    {mode === "edit" ? (
-                        <FieldDescription className = "text-xs text-slate-400">License no. cannot be changed.</FieldDescription>
-                    ) : (
-                        <FieldDescription className = "text-xs">Include hyphens.</FieldDescription>
-                    )}
-                </FieldSet>
-
+                {/* PERSONAL DETAILS SECTION */}
                 <FieldSet className = "gap-y-2">
                     <FieldLabel>{isSearch ? "Full Name" : "Full Name *"}</FieldLabel>
                     <Field>
@@ -125,6 +72,54 @@ export function DriverForm({ mode, formData, onChange, filterData, onFilterChang
                         />
                     </Field>
                     <FieldDescription className = "text-xs">Separate first, middle, and last name with spaces.</FieldDescription>
+                </FieldSet>
+
+                <FieldSet>
+                    <FieldLabel>{isSearch ? "Gender" : "Gender *"}</FieldLabel>
+                    {isSearch ? (
+                        <RadioGroup
+                            value = {filterData!.sex_m ? "M" : filterData!.sex_f ? "F" : "All"}
+                            onValueChange = {(v) => {
+                                if (v === "M") {
+                                    setFilter("sex_m", true);
+                                    setFilter("sex_f", false);
+                                } else if (v === "F") {
+                                    setFilter("sex_m", false);
+                                    setFilter("sex_f", true);
+                                } else {
+                                    setFilter("sex_m", false);
+                                    setFilter("sex_f", false);
+                                }
+                            }}
+                        >
+                            <Field orientation = "horizontal">
+                                <RadioGroupItem value = "All" id = "gender-all" />
+                                <FieldLabel htmlFor = "gender-all" className = "font-normal">All</FieldLabel>
+                            </Field>
+                            <Field orientation = "horizontal">
+                                <RadioGroupItem value = "M" id = "gender-m" />
+                                <FieldLabel htmlFor = "gender-m" className = "font-normal">M</FieldLabel>
+                            </Field>
+                            <Field orientation = "horizontal">
+                                <RadioGroupItem value = "F" id = "gender-f" />
+                                <FieldLabel htmlFor = "gender-f" className = "font-normal">F</FieldLabel>
+                            </Field>
+                        </RadioGroup>
+                    ) : (
+                        <RadioGroup
+                            value = {formData!.sex}
+                            onValueChange = {(v) => set("sex", v as Sex)}
+                        >
+                            <Field orientation = "horizontal">
+                                <RadioGroupItem value = "M" id = "gender-m" />
+                                <FieldLabel htmlFor = "gender-m" className = "font-normal">M</FieldLabel>
+                            </Field>
+                            <Field orientation = "horizontal">
+                                <RadioGroupItem value = "F" id = "gender-f" />
+                                <FieldLabel htmlFor = "gender-f" className = "font-normal">F</FieldLabel>
+                            </Field>
+                        </RadioGroup>
+                    )}
                 </FieldSet>
 
                 <FieldSet className = "flex-row justify-between">
@@ -151,46 +146,6 @@ export function DriverForm({ mode, formData, onChange, filterData, onFilterChang
                     )}
                 </FieldSet>
 
-                <FieldSet>
-                    <FieldLabel>{isSearch ? "Gender" : "Gender *"}</FieldLabel>
-                    {isSearch ? (
-                        <Field>
-                            <div className = "flex flex-col gap-4">
-                                <div className = "flex flex-row gap-3 -mt-2.5">
-                                    <Checkbox
-                                        id = "gender-checkbox-m"
-                                        checked = {filterData!.sex_m}
-                                        onCheckedChange = {(v) => setFilter("sex_m", !!v)}
-                                    />
-                                    <Label className = "font-normal" htmlFor = "gender-checkbox-m">M</Label>
-                                </div>
-                                <div className = "flex flex-row gap-3">
-                                    <Checkbox
-                                        id = "gender-checkbox-f"
-                                        checked = {filterData!.sex_f}
-                                        onCheckedChange = {(v) => setFilter("sex_f", !!v)}
-                                    />
-                                    <Label className = "font-normal" htmlFor = "gender-checkbox-f">F</Label>
-                                </div>
-                            </div>
-                        </Field>
-                    ) : (
-                        <RadioGroup
-                            value = {formData!.sex}
-                            onValueChange = {(v) => set("sex", v as Sex)}
-                        >
-                            <Field orientation = "horizontal">
-                                <RadioGroupItem value = "M" id = "gender-m" />
-                                <FieldLabel htmlFor = "gender-m" className = "font-normal">M</FieldLabel>
-                            </Field>
-                            <Field orientation = "horizontal">
-                                <RadioGroupItem value = "F" id = "gender-f" />
-                                <FieldLabel htmlFor = "gender-f" className = "font-normal">F</FieldLabel>
-                            </Field>
-                        </RadioGroup>
-                    )}
-                </FieldSet>
-
                 <FieldSet className = "gap-y-2">
                     <FieldLabel>{isSearch ? "Address" : "Address *"}</FieldLabel>
                     <Field>
@@ -206,6 +161,27 @@ export function DriverForm({ mode, formData, onChange, filterData, onFilterChang
                 </FieldSet>
 
                 <FieldSeparator />
+
+                {/* LICENSE DETAILS SECTION */}
+                <FieldSet className = "gap-y-2">
+                    <FieldLabel>{isSearch ? "License No." : "License No. *"}</FieldLabel>
+                    <Field>
+                        <Input
+                            placeholder = "N01-12-345678"
+                            className = "rounded-md text-sm"
+                            required = {!isSearch}
+                            readOnly = {mode === "edit"}
+                            value = {isSearch ? filterData!.license_number : formData!.license_number}
+                            onChange = {(e) => isSearch ? setFilter("license_number", e.target.value) : set("license_number", e.target.value)}
+                        />
+                    </Field>
+
+                    {mode === "edit" ? (
+                        <FieldDescription className = "text-xs text-slate-400">License no. cannot be changed.</FieldDescription>
+                    ) : (
+                        <FieldDescription className = "text-xs">Include hyphens.</FieldDescription>
+                    )}
+                </FieldSet>
 
                 <FieldSet>
                     <FieldLabel>{isSearch ? "Type" : "Type *"}</FieldLabel>

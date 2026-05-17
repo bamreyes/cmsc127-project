@@ -37,3 +37,37 @@ export interface DriverFilter {
   min_year?: number | null;
   max_year?: number | null;
 }
+
+export interface DriverFormData {
+  license_number: string;
+  full_name: string;
+  date_of_birth: Date | undefined;
+  sex: Sex;
+  address: string;
+  license_type: LicenseType;
+  license_status: LicenseStatus;
+  issued_at: Date | undefined;
+  expires_at: Date | undefined;
+}
+
+export interface DriverFilterData {
+  license_number: string;
+  full_name: string;
+  date_of_birth_min: Date | undefined;
+  date_of_birth_max: Date | undefined;
+  sex_m: boolean;
+  sex_f: boolean;
+  address: string;
+  license_type_nonpro: boolean;
+  license_type_pro: boolean;
+  license_type_student: boolean;
+  license_status_valid: boolean;
+  license_status_expired: boolean;
+  license_status_suspended: boolean;
+  license_status_revoked: boolean;
+  issued_at_min: Date | undefined;
+  issued_at_max: Date | undefined;
+  expires_at_min: Date | undefined;
+  expires_at_max: Date | undefined;
+}
+

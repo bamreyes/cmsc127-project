@@ -1,4 +1,5 @@
-import type { ViolationStatus } from "@shared";
+import type { ViolationStatus, ViolationFormData, ViolationFilterData } from "@shared";
+export type { ViolationFormData, ViolationFilterData };
 import { Field, FieldDescription, FieldGroup,
          FieldLabel, FieldSeparator, FieldSet } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
@@ -6,32 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox.tsx";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group.tsx";
 import { DatePicker } from "@/components/DatePicker";
-
-export interface ViolationFormData {
-    date: Date | undefined;
-    license_number: string;
-    plate_number: string;
-    location: string;
-    violation_type: string;
-    fine_amount: number | "";
-    apprehending_officer: string;
-    violation_status: ViolationStatus;
-}
-
-export interface ViolationFilterData {
-    date_min: Date | undefined;
-    date_max: Date | undefined;
-    license_number: string;
-    plate_number: string;
-    location: string;
-    violation_type: string;
-    min_fine_amount: number | "";
-    max_fine_amount: number | "";
-    apprehending_officer: string;
-    violation_status_unpaid: boolean;
-    violation_status_paid: boolean;
-    violation_status_contested: boolean;
-}
 
 export const defaultViolationFormData: ViolationFormData = {
     date: undefined,
@@ -77,30 +52,7 @@ export function ViolationForm({ mode, formData, onChange, filterData, onFilterCh
     return (
         <>
             <FieldGroup className = "gap-y-6">
-                <FieldSet className = "flex-row justify-between">
-                    <FieldLabel>{isSearch ? "Date" : "Date *"}</FieldLabel>
-                    {isSearch ? (
-                        <div className = "flex flex-row gap-2">
-                            <DatePicker
-                                placeholder = "Min"
-                                selected = {filterData!.date_min}
-                                onSelect = {(d) => setFilter("date_min", d)}
-                            />
-                            <DatePicker
-                                placeholder = "Max"
-                                selected = {filterData!.date_max}
-                                onSelect = {(d) => setFilter("date_max", d)}
-                            />
-                        </div>
-                    ) : (
-                        <DatePicker
-                            required
-                            selected = {formData!.date}
-                            onSelect = {(d) => set("date", d)}
-                        />
-                    )}
-                </FieldSet>
-
+                {/* IDENTIFICATION */}
                 <FieldSet className = "gap-y-2">
                     <FieldLabel>{isSearch ? "Violator" : "Violator *"}</FieldLabel>
                     <Field>
@@ -129,22 +81,7 @@ export function ViolationForm({ mode, formData, onChange, filterData, onFilterCh
                     <FieldDescription className = "text-xs">Separate with spaces.</FieldDescription>
                 </FieldSet>
 
-                <FieldSeparator />
-
-                <FieldSet className = "gap-y-2">
-                    <FieldLabel>{isSearch ? "Location" : "Location *"}</FieldLabel>
-                    <Field>
-                        <Input
-                            placeholder = "Sampaloc, Manila"
-                            className = "rounded-md text-sm"
-                            required = {!isSearch}
-                            value = {isSearch ? filterData!.location : formData!.location}
-                            onChange = {(e) => isSearch ? setFilter("location", e.target.value) : set("location", e.target.value)}
-                        />
-                    </Field>
-                    <FieldDescription className = "text-xs">Separate with commas.</FieldDescription>
-                </FieldSet>
-
+                {/* VIOLATION DETAILS */}
                 <FieldSet className = "gap-y-2">
                     <FieldLabel>{isSearch ? "Violation" : "Violation *"}</FieldLabel>
                     <Field>
@@ -202,6 +139,44 @@ export function ViolationForm({ mode, formData, onChange, filterData, onFilterCh
                 </FieldSet>
 
                 <FieldSet className = "gap-y-2">
+                    <FieldLabel>{isSearch ? "Location" : "Location *"}</FieldLabel>
+                    <Field>
+                        <Input
+                            placeholder = "Sampaloc, Manila"
+                            className = "rounded-md text-sm"
+                            required = {!isSearch}
+                            value = {isSearch ? filterData!.location : formData!.location}
+                            onChange = {(e) => isSearch ? setFilter("location", e.target.value) : set("location", e.target.value)}
+                        />
+                    </Field>
+                    <FieldDescription className = "text-xs">Separate with commas.</FieldDescription>
+                </FieldSet>
+
+                <FieldSet className = "flex-row justify-between">
+                    <FieldLabel>{isSearch ? "Date" : "Date *"}</FieldLabel>
+                    {isSearch ? (
+                        <div className = "flex flex-row gap-2">
+                            <DatePicker
+                                placeholder = "Min"
+                                selected = {filterData!.date_min}
+                                onSelect = {(d) => setFilter("date_min", d)}
+                            />
+                            <DatePicker
+                                placeholder = "Max"
+                                selected = {filterData!.date_max}
+                                onSelect = {(d) => setFilter("date_max", d)}
+                            />
+                        </div>
+                    ) : (
+                        <DatePicker
+                            required
+                            selected = {formData!.date}
+                            onSelect = {(d) => set("date", d)}
+                        />
+                    )}
+                </FieldSet>
+
+                <FieldSet className = "gap-y-2">
                     <FieldLabel>Officer</FieldLabel>
                     <Field>
                         <Input
@@ -214,6 +189,9 @@ export function ViolationForm({ mode, formData, onChange, filterData, onFilterCh
                     <FieldDescription className = "text-xs">Separate first, middle, and last name with spaces.</FieldDescription>
                 </FieldSet>
 
+                <FieldSeparator />
+
+                {/* PAYMENT STATUS */}
                 <FieldSet>
                     <FieldLabel>{isSearch ? "Status" : "Status *"}</FieldLabel>
                     {isSearch ? (

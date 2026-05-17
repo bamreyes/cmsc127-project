@@ -1,37 +1,11 @@
-import type { VehicleType } from "@shared";
+import type { VehicleType, VehicleFormData, VehicleFilterData } from "@shared";
+export type { VehicleFormData, VehicleFilterData };
 import { Field, FieldDescription, FieldGroup,
          FieldLabel, FieldSeparator, FieldSet } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox.tsx";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group.tsx";
-
-export interface VehicleFormData {
-    plate_number: string;
-    license_number: string;
-    engine_number: string;
-    chassis_number: string;
-    make: string;
-    model: string;
-    year: number | "";
-    vehicle_type: VehicleType;
-    color: string;
-}
-
-export interface VehicleFilterData {
-    plate_number: string;
-    license_number: string;
-    engine_number: string;
-    chassis_number: string;
-    make: string;
-    model: string;
-    min_year: number | "";
-    max_year: number | "";
-    vehicle_type_private: boolean;
-    vehicle_type_puv: boolean;
-    vehicle_type_motor: boolean;
-    color: string;
-}
 
 export const defaultVehicleFormData: VehicleFormData = {
     plate_number: "",
@@ -78,6 +52,7 @@ export function VehicleForm({ mode, formData, onChange, filterData, onFilterChan
     return (
         <>
             <FieldGroup className = "gap-y-6">
+                {/* IDENTIFICATION & VEHICLE INFO */}
                 <FieldSet className = "gap-y-2">
                     <FieldLabel>{isSearch ? "Plate No." : "Plate No. *"}</FieldLabel>
                     <Field>
@@ -111,36 +86,6 @@ export function VehicleForm({ mode, formData, onChange, filterData, onFilterChan
                     </Field>
                     <FieldDescription className = "text-xs">Enter license no. and include hyphens.</FieldDescription>
                 </FieldSet>
-
-                <FieldSet className = "gap-y-2">
-                    <FieldLabel>{isSearch ? "Engine No." : "Engine No. *"}</FieldLabel>
-                    <Field>
-                        <Input
-                            placeholder = "ENG-123456"
-                            className = "rounded-md text-sm"
-                            required = {!isSearch}
-                            value = {isSearch ? filterData!.engine_number : formData!.engine_number}
-                            onChange = {(e) => isSearch ? setFilter("engine_number", e.target.value) : set("engine_number", e.target.value)}
-                        />
-                    </Field>
-                    <FieldDescription className = "text-xs">Include hyphen.</FieldDescription>
-                </FieldSet>
-
-                <FieldSet className = "gap-y-2">
-                    <FieldLabel>{isSearch ? "Chassis No." : "Chassis No. *"}</FieldLabel>
-                    <Field>
-                        <Input
-                            placeholder = "CHA-123456"
-                            className = "rounded-md text-sm"
-                            required = {!isSearch}
-                            value = {isSearch ? filterData!.chassis_number : formData!.chassis_number}
-                            onChange = {(e) => isSearch ? setFilter("chassis_number", e.target.value) : set("chassis_number", e.target.value)}
-                        />
-                    </Field>
-                    <FieldDescription className = "text-xs">Include hyphen.</FieldDescription>
-                </FieldSet>
-
-                <FieldSeparator />
 
                 <FieldSet className = "gap-y-2">
                     <FieldLabel>{isSearch ? "Make" : "Make *"}</FieldLabel>
@@ -214,6 +159,19 @@ export function VehicleForm({ mode, formData, onChange, filterData, onFilterChan
                     )}
                 </FieldSet>
 
+                <FieldSet className = "gap-y-2">
+                    <FieldLabel>{isSearch ? "Color" : "Color *"}</FieldLabel>
+                    <Field>
+                        <Input
+                            placeholder = "Classic Silver Metallic"
+                            className = "rounded-md text-sm"
+                            required = {!isSearch}
+                            value = {isSearch ? filterData!.color : formData!.color}
+                            onChange = {(e) => isSearch ? setFilter("color", e.target.value) : set("color", e.target.value)}
+                        />
+                    </Field>
+                </FieldSet>
+
                 <FieldSet>
                     <FieldLabel>{isSearch ? "Type" : "Type *"}</FieldLabel>
                     {isSearch ? (
@@ -266,17 +224,35 @@ export function VehicleForm({ mode, formData, onChange, filterData, onFilterChan
                     )}
                 </FieldSet>
 
+                <FieldSeparator />
+
+                {/* MECHANICAL DETAILS */}
                 <FieldSet className = "gap-y-2">
-                    <FieldLabel>{isSearch ? "Color" : "Color *"}</FieldLabel>
+                    <FieldLabel>{isSearch ? "Engine No." : "Engine No. *"}</FieldLabel>
                     <Field>
                         <Input
-                            placeholder = "Classic Silver Metallic"
+                            placeholder = "ENG-123456"
                             className = "rounded-md text-sm"
                             required = {!isSearch}
-                            value = {isSearch ? filterData!.color : formData!.color}
-                            onChange = {(e) => isSearch ? setFilter("color", e.target.value) : set("color", e.target.value)}
+                            value = {isSearch ? filterData!.engine_number : formData!.engine_number}
+                            onChange = {(e) => isSearch ? setFilter("engine_number", e.target.value) : set("engine_number", e.target.value)}
                         />
                     </Field>
+                    <FieldDescription className = "text-xs">Include hyphen.</FieldDescription>
+                </FieldSet>
+
+                <FieldSet className = "gap-y-2">
+                    <FieldLabel>{isSearch ? "Chassis No." : "Chassis No. *"}</FieldLabel>
+                    <Field>
+                        <Input
+                            placeholder = "CHA-123456"
+                            className = "rounded-md text-sm"
+                            required = {!isSearch}
+                            value = {isSearch ? filterData!.chassis_number : formData!.chassis_number}
+                            onChange = {(e) => isSearch ? setFilter("chassis_number", e.target.value) : set("chassis_number", e.target.value)}
+                        />
+                    </Field>
+                    <FieldDescription className = "text-xs">Include hyphen.</FieldDescription>
                 </FieldSet>
             </FieldGroup>
         </>

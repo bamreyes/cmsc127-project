@@ -24,3 +24,31 @@ export interface VehicleFilter {
   max_year?: number | null;
   color?: string | null;
 }
+
+export interface VehicleFormData {
+  plate_number: string;
+  license_number: string;
+  engine_number: string;
+  chassis_number: string;
+  make: string;
+  model: string;
+  year: number | "";
+  vehicle_type: VehicleType;
+  color: string;
+}
+
+export interface VehicleFilterData {
+  plate_number: string;
+  license_number: string;
+  engine_number: string;
+  chassis_number: string;
+  make: string;
+  model: string;
+  min_year: number | "";
+  max_year: number | "";
+  vehicle_type_private: boolean;
+  vehicle_type_puv: boolean;
+  vehicle_type_motor: boolean;
+  color: string;
+}
+

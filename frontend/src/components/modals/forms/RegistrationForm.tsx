@@ -1,4 +1,5 @@
-import type { RegistrationStatus } from "@shared";
+import type { RegistrationStatus, RegistrationFormData, RegistrationFilterData } from "@shared";
+export type { RegistrationFormData, RegistrationFilterData };
 import { Field, FieldDescription, FieldGroup,
          FieldLabel, FieldSeparator, FieldSet } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
@@ -6,26 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox.tsx";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group.tsx";
 import { DatePicker } from "@/components/DatePicker";
-
-export interface RegistrationFormData {
-    registration_number: number | "";
-    plate_number: string;
-    registration_status: RegistrationStatus;
-    registration_date: Date | undefined;
-    expiration_date: Date | undefined;
-}
-
-export interface RegistrationFilterData {
-    registration_number: number | "";
-    plate_number: string;
-    registration_status_active: boolean;
-    registration_status_expired: boolean;
-    registration_status_suspended: boolean;
-    registration_date_min: Date | undefined;
-    registration_date_max: Date | undefined;
-    expiration_date_min: Date | undefined;
-    expiration_date_max: Date | undefined;
-}
 
 export const defaultRegistrationFormData: RegistrationFormData = {
     registration_number: "",
@@ -103,6 +84,54 @@ export function RegistrationForm({ mode, formData, onChange, filterData, onFilte
                     <FieldDescription className = "text-xs">Separate with spaces.</FieldDescription>
                 </FieldSet>
 
+                <FieldSet className = "flex-row justify-between">
+                    <FieldLabel>{isSearch ? "Registration Date" : "Registration Date *"}</FieldLabel>
+                    {isSearch ? (
+                        <div className = "flex flex-row gap-2">
+                            <DatePicker
+                                placeholder = "Min"
+                                selected = {filterData!.registration_date_min}
+                                onSelect = {(d) => setFilter("registration_date_min", d)}
+                            />
+                            <DatePicker
+                                placeholder = "Max"
+                                selected = {filterData!.registration_date_max}
+                                onSelect = {(d) => setFilter("registration_date_max", d)}
+                            />
+                        </div>
+                    ) : (
+                        <DatePicker
+                            required
+                            selected = {formData!.registration_date}
+                            onSelect = {(d) => set("registration_date", d)}
+                        />
+                    )}
+                </FieldSet>
+
+                <FieldSet className = "flex-row justify-between">
+                    <FieldLabel>{isSearch ? "Expiration Date" : "Expiration Date *"}</FieldLabel>
+                    {isSearch ? (
+                        <div className = "flex flex-row gap-2">
+                            <DatePicker
+                                placeholder = "Min"
+                                selected = {filterData!.expiration_date_min}
+                                onSelect = {(d) => setFilter("expiration_date_min", d)}
+                            />
+                            <DatePicker
+                                placeholder = "Max"
+                                selected = {filterData!.expiration_date_max}
+                                onSelect = {(d) => setFilter("expiration_date_max", d)}
+                            />
+                        </div>
+                    ) : (
+                        <DatePicker
+                            required
+                            selected = {formData!.expiration_date}
+                            onSelect = {(d) => set("expiration_date", d)}
+                        />
+                    )}
+                </FieldSet>
+
                 <FieldSeparator />
 
                 <FieldSet>
@@ -154,54 +183,6 @@ export function RegistrationForm({ mode, formData, onChange, filterData, onFilte
                                 <FieldLabel htmlFor = "registration-suspended" className = "font-normal">Suspended</FieldLabel>
                             </Field>
                         </RadioGroup>
-                    )}
-                </FieldSet>
-
-                <FieldSet className = "flex-row justify-between">
-                    <FieldLabel>{isSearch ? "Registration Date" : "Registration Date *"}</FieldLabel>
-                    {isSearch ? (
-                        <div className = "flex flex-row gap-2">
-                            <DatePicker
-                                placeholder = "Min"
-                                selected = {filterData!.registration_date_min}
-                                onSelect = {(d) => setFilter("registration_date_min", d)}
-                            />
-                            <DatePicker
-                                placeholder = "Max"
-                                selected = {filterData!.registration_date_max}
-                                onSelect = {(d) => setFilter("registration_date_max", d)}
-                            />
-                        </div>
-                    ) : (
-                        <DatePicker
-                            required
-                            selected = {formData!.registration_date}
-                            onSelect = {(d) => set("registration_date", d)}
-                        />
-                    )}
-                </FieldSet>
-
-                <FieldSet className = "flex-row justify-between">
-                    <FieldLabel>{isSearch ? "Expiration Date" : "Expiration Date *"}</FieldLabel>
-                    {isSearch ? (
-                        <div className = "flex flex-row gap-2">
-                            <DatePicker
-                                placeholder = "Min"
-                                selected = {filterData!.expiration_date_min}
-                                onSelect = {(d) => setFilter("expiration_date_min", d)}
-                            />
-                            <DatePicker
-                                placeholder = "Max"
-                                selected = {filterData!.expiration_date_max}
-                                onSelect = {(d) => setFilter("expiration_date_max", d)}
-                            />
-                        </div>
-                    ) : (
-                        <DatePicker
-                            required
-                            selected = {formData!.expiration_date}
-                            onSelect = {(d) => set("expiration_date", d)}
-                        />
                     )}
                 </FieldSet>
             </FieldGroup>
