@@ -32,6 +32,7 @@ const formatDate = (val: any) => {
 // --- Driver Columns ---
 export const getDriverColumns = (
   onDelete: (id: string) => void,
+  onEdit: (driver: Driver) => void
 ): ColumnDef<Driver>[] => [
   {
     accessorKey: "license_number",
@@ -61,6 +62,20 @@ export const getDriverColumns = (
   {
     accessorKey: "license_status",
     header: "Status",
+    cell: ({ getValue }) => {
+      const status = (getValue() as string) || "Active";
+      let classes = "bg-emerald-50 text-emerald-700 border-emerald-200/60";
+      if (status === "Expired") {
+        classes = "bg-rose-50 text-rose-700 border-rose-200/60";
+      } else if (status === "Suspended") {
+        classes = "bg-amber-50 text-amber-700 border-amber-200/60";
+      }
+      return (
+        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border tracking-wider uppercase ${classes}`}>
+          {status}
+        </span>
+      );
+    }
   },
   {
     accessorKey: "issued_at",
@@ -72,45 +87,40 @@ export const getDriverColumns = (
     header: "Expiry Date",
     cell: ({ getValue }) => formatDate(getValue()),
   },
-  {
-    id: "actions",
-    header: "Actions",
-    cell: ({ row }) => {
-      const driver = row.original;
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={() => console.log("Edit driver", driver.license_number)}
-            >
-              <Pencil className="mr-2 h-4 w-4" />
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => onDelete(driver.license_number)}
-              className="text-red-600 focus:text-red-600"
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
-  },
+    {
+        id: "actions",
+        cell: ({ row }) => {
+            const driver = row.original;
+            return (
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant = "ghost" className = "h-8 w-8 p-0">
+                            <MoreHorizontal className = "h-4 w-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align = "end">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick = {() => onEdit(driver)}>
+                            <Pencil className = "mr-2 h-4 w-4" />
+                            Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick = {() => onDelete(driver.license_number)} className = "text-red-600 focus:text-red-600">
+                            <Trash2 className = "mr-2 h-4 w-4" />
+                            Delete
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            );
+        },
+    }
 ];
 
 // --- Vehicle Columns ---
-export const getVehicleColumns = (onDelete: (id: string) => void): ColumnDef<Vehicle>[] => [
+export const getVehicleColumns = (
+    onDelete: (id: string) => void,
+    onEdit: (vehicle: Vehicle) => void,
+): ColumnDef<Vehicle>[] => [
   {
     accessorKey: "plate_number",
     header: "Plate No.",
@@ -162,45 +172,38 @@ export const getVehicleColumns = (onDelete: (id: string) => void): ColumnDef<Veh
     accessorKey: "color",
     header: "Color",
   },
-  {
-    id: "actions",
-    header: "Actions",
-    cell: ({ row }) => {
-      const vehicle = row.original;
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={() => console.log("Edit vehicle", vehicle.plate_number)}
-            >
-              <Pencil className="mr-2 h-4 w-4" />
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => onDelete(vehicle.plate_number)}
-              className="text-red-600 focus:text-red-600"
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
-  },
+    {
+        id: "actions",
+        cell: ({ row }) => {
+            const vehicle = row.original;
+            return (
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant = "ghost" className = "h-8 w-8 p-0">
+                            <MoreHorizontal className = "h-4 w-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align = "end">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick = {() => onEdit(vehicle)}>
+                            <Pencil className = "mr-2 h-4 w-4" />Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick = {() => onDelete(vehicle.plate_number)} className = "text-red-600 focus:text-red-600">
+                            <Trash2 className = "mr-2 h-4 w-4" />Delete
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            );
+        },
+    }
 ];
 
 // --- Violation Columns ---
-export const getViolationColumns = (onDelete: (id: string | number) => void): ColumnDef<TrafficViolation>[] => [
+export const getViolationColumns = (
+    onDelete: (id: string | number) => void,
+    onEdit: (violation: TrafficViolation) => void,
+): ColumnDef<TrafficViolation>[] => [
   {
     accessorKey: "violation_id",
     header: "ID",
@@ -260,48 +263,51 @@ export const getViolationColumns = (onDelete: (id: string | number) => void): Co
   {
     accessorKey: "violation_status",
     header: "Status",
-  },
-  {
-    id: "actions",
-    header: "Actions",
-    cell: ({ row }) => {
-      const violation = row.original;
-
+    cell: ({ getValue }) => {
+      const status = (getValue() as string) || "Unpaid";
+      let classes = "bg-rose-50 text-rose-700 border-rose-200/60";
+      if (status === "Paid") {
+        classes = "bg-emerald-50 text-emerald-700 border-emerald-200/60";
+      }
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={() =>
-                console.log("Edit violation", violation.violation_id)
-              }
-            >
-              <Pencil className="mr-2 h-4 w-4" />
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => onDelete(violation.violation_id)}
-              className="text-red-600 focus:text-red-600"
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border tracking-wider uppercase ${classes}`}>
+          {status}
+        </span>
       );
-    },
+    }
   },
+    {
+        id: "actions",
+        cell: ({ row }) => {
+            const violation = row.original;
+            return (
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant = "ghost" className = "h-8 w-8 p-0">
+                            <MoreHorizontal className = "h-4 w-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align = "end">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick = {() => onEdit(violation)}>
+                            <Pencil className = "mr-2 h-4 w-4" />Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick = {() => onDelete(violation.violation_id)} className = "text-red-600 focus:text-red-600">
+                            <Trash2 className = "mr-2 h-4 w-4" />Delete
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            );
+        },
+    }
 ];
 
 // --- Registration (Transaction) Columns ---
-export const getRegistrationColumns = (onDelete: (id: string | number) => void): ColumnDef<VehicleRegistration>[] => [
+export const getRegistrationColumns = (
+    onDelete: (id: string | number) => void,
+    onEdit: (registration: VehicleRegistration) => void,
+): ColumnDef<VehicleRegistration>[] => [
   {
     accessorKey: "registration_number",
     header: "Reg No.",
@@ -332,6 +338,22 @@ export const getRegistrationColumns = (onDelete: (id: string | number) => void):
   {
     accessorKey: "registration_status",
     header: "Status",
+    cell: ({ getValue }) => {
+      const status = (getValue() as string) || "Active";
+      let classes = "bg-emerald-50 text-emerald-700 border-emerald-200/60";
+      if (status === "Expired") {
+        classes = "bg-rose-50 text-rose-700 border-rose-200/60";
+      } else if (status === "Suspended") {
+        classes = "bg-amber-50 text-amber-700 border-amber-200/60";
+      } else if (status === "Pending") {
+        classes = "bg-blue-50 text-blue-700 border-blue-200/60";
+      }
+      return (
+        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border tracking-wider uppercase ${classes}`}>
+          {status}
+        </span>
+      );
+    }
   },
   {
     accessorKey: "registration_date",
@@ -343,41 +365,29 @@ export const getRegistrationColumns = (onDelete: (id: string | number) => void):
     header: "Exp Date",
     cell: ({ getValue }) => formatDate(getValue()),
   },
-  {
-    id: "actions",
-    header: "Actions",
-    cell: ({ row }) => {
-      const reg = row.original;
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={() =>
-                console.log("Edit registration", reg.registration_number)
-              }
-            >
-              <Pencil className="mr-2 h-4 w-4" />
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => onDelete(reg.registration_number)}
-              className="text-red-600 focus:text-red-600"
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
-  },
+    {
+        id: "actions",
+            cell: ({ row }) => {
+                const reg = row.original;
+                return (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant = "ghost" className = "h-8 w-8 p-0">
+                                <MoreHorizontal className = "h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align = "end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick = {() => onEdit(reg)}>
+                                <Pencil className = "mr-2 h-4 w-4" />Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick = {() => onDelete(reg.registration_number)} className = "text-red-600 focus:text-red-600">
+                                <Trash2 className = "mr-2 h-4 w-4" />Delete
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                );
+            },
+    }
 ];

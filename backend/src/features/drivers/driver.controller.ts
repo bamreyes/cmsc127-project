@@ -12,9 +12,7 @@ import {
 export const getAllDrivers = async (req: Request, res: Response) => {
   try {
     const result = await DriverService.getAllDrivers();
-    console.log(result);
-
-    res.status(200).send({ success: true, data: result });
+res.status(200).send({ success: true, data: result });
   } catch (error) {
     res.status(500).send({ success: false, message: "An error occured" });
   }
@@ -39,9 +37,7 @@ export const getDriver = async (req: Request, res: Response) => {
 
   try {
     const result = await DriverService.getDriver(license_number as string);
-    console.log(result);
-
-    if (!result) {
+if (!result) {
       return res
         .status(404)
         .send({ success: false, message: "Driver not found" });
@@ -117,9 +113,7 @@ export const createDriver = async (req: Request, res: Response) => {
       issued_at,
       expires_at,
     } as Driver);
-    console.log(result);
-
-    res.status(200).send({
+res.status(200).send({
       success: true,
       message: "Driver created successfully",
       data: result,
@@ -165,7 +159,6 @@ export const updateDriver = async (req: Request, res: Response) => {
   } = req.body;
 
   const requiredFields = [
-    "license_number",
     "full_name",
     "date_of_birth",
     "sex",
@@ -186,7 +179,8 @@ export const updateDriver = async (req: Request, res: Response) => {
 
   if (
     isNaN(new Date(issued_at).getTime()) ||
-    isNaN(new Date(expires_at).getTime())
+    isNaN(new Date(expires_at).getTime()) ||
+    isNaN(new Date(date_of_birth).getTime())
   ) {
     return res.status(400).send({
       success: false,
@@ -213,9 +207,7 @@ export const updateDriver = async (req: Request, res: Response) => {
       issued_at,
       expires_at,
     } as Driver);
-    console.log(result);
-
-    if (!result) {
+if (!result) {
       return res
         .status(404)
         .send({ success: false, message: "Driver not found" });
@@ -226,7 +218,10 @@ export const updateDriver = async (req: Request, res: Response) => {
       message: "Driver updated successfully",
       data: result,
     });
-  } catch (error) {
+  } catch (error: any) {
+    if (error.code === "ER_ROW_IS_REFERENCED" || error.code === "ER_DUP_ENTRY") {
+      return res.status(409).send({ success: false, message: error.message });
+    }
     res.status(500).send({ success: false, message: "An error occured" });
   }
 };
@@ -250,9 +245,7 @@ export const deleteDriver = async (req: Request, res: Response) => {
 
   try {
     const result = await DriverService.deleteDriver(license_number as string);
-    console.log(result);
-
-    if (!result) {
+if (!result) {
       return res
         .status(404)
         .send({ success: false, message: "Driver not found" });
@@ -263,28 +256,31 @@ export const deleteDriver = async (req: Request, res: Response) => {
       message: "Driver successfully deleted",
       deleted_id: result,
     });
-  } catch (error) {
+  } catch (error: any) {
+    if (error.code === "ER_ROW_IS_REFERENCED") {
+      return res.status(409).send({ success: false, message: error.message });
+    }
     res.status(500).send({ success: false, message: "An error occured" });
   }
 };
 
 // GET /api/drivers/filter/
 export const filterDrivers = async (req: Request, res: Response) => {
-  const { license_type, license_status, min_bdate, max_bdate, sex, address } =
-    req.query;
+  const { license_type, license_status, min_bdate, max_bdate, sex, address,
+          license_number, full_name } = req.query;
 
   if (min_bdate || max_bdate) {
-    const min = new Date(min_bdate as string);
-    const max = new Date(max_bdate as string);
+    const minD = min_bdate ? new Date(min_bdate as string) : null;
+    const maxD = max_bdate ? new Date(max_bdate as string) : null;
 
-    if (isNaN(min.getTime()) || isNaN(max.getTime())) {
+    if ((min_bdate && isNaN(minD!.getTime())) || (max_bdate && isNaN(maxD!.getTime()))) {
       return res.status(400).send({
         success: false,
         message: "Dates must be in a valid format (YYYY-MM-DD)",
       });
     }
 
-    if (min > max) {
+    if (minD && maxD && minD > maxD) {
       return res.status(400).send({
         success: false,
         message: "Minimum date cannot be after maximum date",
@@ -300,7 +296,9 @@ export const filterDrivers = async (req: Request, res: Response) => {
       min_bdate: min_bdate ? new Date(min_bdate as string) : null,
       max_bdate: max_bdate ? new Date(max_bdate as string) : null,
       address: (address as string) ?? null,
-    } as DriverFilter);
+      license_number: (license_number as string) ?? null, 
+      full_name: (full_name as string) ?? null
+    });
 
     res.status(200).send({
       success: true,

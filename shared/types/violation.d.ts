@@ -26,3 +26,30 @@ export interface ViolationFilter {
   license_number?: string | null;
   plate_number?: string | null;
 }
+
+export interface ViolationFormData {
+  date: Date | undefined;
+  license_number: string;
+  plate_number: string;
+  location: string;
+  violation_type: string;
+  fine_amount: number | "";
+  apprehending_officer: string;
+  violation_status: ViolationStatus;
+}
+
+export interface ViolationFilterData {
+  date_min: Date | undefined;
+  date_max: Date | undefined;
+  license_number: string;
+  plate_number: string;
+  location: string;
+  violation_type: string;
+  min_fine_amount: number | "";
+  max_fine_amount: number | "";
+  apprehending_officer: string;
+  violation_status_unpaid: boolean;
+  violation_status_paid: boolean;
+  violation_status_contested: boolean;
+}
+

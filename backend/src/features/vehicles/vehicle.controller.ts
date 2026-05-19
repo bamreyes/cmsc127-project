@@ -12,9 +12,7 @@ import {
 export const getAllVehicles = async (req: Request, res: Response) => {
   try {
     const result = await VehicleService.getAllVehicles();
-    console.log(result);
-
-    res.status(200).send({ success: true, data: result });
+res.status(200).send({ success: true, data: result });
   } catch (error) {
     res.status(500).send({ success: false, message: "An error occured" });
   }
@@ -41,9 +39,7 @@ export const getVehicle = async (req: Request, res: Response) => {
 
   try {
     const result = await VehicleService.getVehicle(plate_number as string);
-    console.log(result);
-
-    if (!result) {
+if (!result) {
       return res
         .status(404)
         .send({ success: false, message: "Vehicle not found" });
@@ -101,10 +97,7 @@ export const createVehicle = async (req: Request, res: Response) => {
       color,
       license_number,
     } as Vehicle);
-
-    console.log(result);
-
-    res
+res
       .status(200)
       .send({
         success: true,
@@ -123,7 +116,7 @@ export const createVehicle = async (req: Request, res: Response) => {
     if (error.code === "ER_NO_REFERENCED_ROW_2") {
       return res.status(409).send({
         success: false,
-        message: "The referenced license number does not exist",
+        message: error.message || "The referenced license number does not exist",
       });
     }
 
@@ -192,10 +185,7 @@ export const updateVehicle = async (req: Request, res: Response) => {
       color,
       license_number,
     } as Vehicle);
-
-    console.log(result);
-
-    if (!result) {
+if (!result) {
       return res
         .status(404)
         .send({ success: false, message: "Vehicle not found" });
@@ -206,7 +196,13 @@ export const updateVehicle = async (req: Request, res: Response) => {
       message: "Vehicle updated successfully",
       data: result,
     });
-  } catch (error) {
+  } catch (error: any) {
+    if (error.code === "ER_NO_REFERENCED_ROW_2") {
+      return res.status(409).send({
+        success: false,
+        message: error.message || "The referenced license number does not exist",
+      });
+    }
     res.status(500).send({
       success: false,
       message: "An error occurred",
@@ -234,9 +230,7 @@ export const deleteVehicle = async (req: Request, res: Response) => {
 
   try {
     const result = await VehicleService.deleteVehicle(plate_number as string);
-    console.log(result);
-
-    if (!result) {
+if (!result) {
       return res
         .status(404)
         .send({ success: false, message: "Vehicle not found" });
@@ -249,7 +243,10 @@ export const deleteVehicle = async (req: Request, res: Response) => {
         message: "Vehicle successfully deleted",
         deleted_id: result,
       });
-  } catch (error) {
+  } catch (error: any) {
+    if (error.code === "ER_ROW_IS_REFERENCED") {
+      return res.status(409).send({ success: false, message: error.message });
+    }
     res.status(500).send({ success: false, message: "An error occured" });
   }
 };
@@ -270,6 +267,15 @@ export const filterByDriver = async (req: Request, res: Response) => {
     license_number,
     min_date,
     max_date,
+    plate_number,
+    engine_number,
+    chassis_number,
+    vehicle_type,
+    make,
+    model,
+    color,
+    min_year,
+    max_year
   } = req.query;
 
   const dateRanges = [
@@ -317,6 +323,15 @@ export const filterByDriver = async (req: Request, res: Response) => {
       max_expires_at: max_expires_at
         ? new Date(max_expires_at as string)
         : null,
+      plate_number: (plate_number as string) || null,
+      engine_number: (engine_number as string) || null,
+      chassis_number: (chassis_number as string) || null,
+      vehicle_type: (vehicle_type as string) || null,
+      make: (make as string) || null,
+      model: (model as string) || null,
+      color: (color as string) || null,
+      min_year: min_year ? Number(min_year) : null,
+      max_year: max_year ? Number(max_year) : null
     };
 
     const vMin = min_date ? new Date(min_date as string) : null;

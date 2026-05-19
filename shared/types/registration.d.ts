@@ -17,3 +17,24 @@ export interface RegistrationFilter {
     min_date?: string | Date | null;
     max_date?: string | Date | null;
 }
+
+export interface RegistrationFormData {
+    registration_number: number | "";
+    plate_number: string;
+    registration_status: RegistrationStatus;
+    registration_date: Date | undefined;
+    expiration_date: Date | undefined;
+}
+
+export interface RegistrationFilterData {
+    registration_number: number | "";
+    plate_number: string;
+    registration_status_active: boolean;
+    registration_status_expired: boolean;
+    registration_status_suspended: boolean;
+    registration_date_min: Date | undefined;
+    registration_date_max: Date | undefined;
+    expiration_date_min: Date | undefined;
+    expiration_date_max: Date | undefined;
+}
+
